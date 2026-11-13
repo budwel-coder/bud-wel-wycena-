@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#172b4d"><title>BUD-WEL — Wyceny</title><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="BUD-WEL">
+<style>
+:root{--navy:#172b4d;--blue:#2457a7;--bg:#f3f5f8;--line:#dfe5ed;--muted:#64748b;--green:#16845b}
+*{box-sizing:border-box}body{margin:0;font:15px system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:#172033}
+header{background:var(--navy);color:white;padding:18px max(16px,calc((100vw - 1120px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
+header h1{font-size:20px;margin:0}header small{opacity:.8}.brand{display:flex;align-items:center;gap:14px}.brand-logo{width:76px;height:76px;object-fit:contain;border-radius:12px;flex:0 0 auto}.brand-copy{display:flex;flex-direction:column;gap:3px}@media(max-width:600px){.brand-logo{width:58px;height:58px}header h1{font-size:18px}}.wrap{max-width:1120px;margin:auto;padding:18px}
+.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.85fr);gap:16px;align-items:start}
+.card{background:white;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 2px 10px #10213a0a}
+h2{font-size:17px;margin:0 0 13px}.muted{color:var(--muted);font-size:13px}
+label{display:block;font-size:12px;font-weight:650;color:#526078;margin:0 0 5px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:9px;background:white;font:inherit;min-width:0}
+input:focus,select:focus,textarea:focus{outline:2px solid #9ab9ed;border-color:var(--blue)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.addrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{border:0;border-radius:9px;padding:11px 14px;font:600 14px system-ui;cursor:pointer;background:var(--blue);color:white}
+button.secondary{background:#e9eef6;color:#24354f}button.danger{background:#fff0f0;color:#a52a2a}button.green{background:var(--green)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.results{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:10px}
+.result{padding:10px 12px;display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #edf0f4;cursor:pointer}
+.result:last-child{border:0}.result:hover{background:#f2f6fc}.result b{font-weight:600}.result small{display:block;color:var(--muted);margin-top:3px}
+/* Wyraźne podświetlenie aktualnie wybranej usługi */
+.result.selected{background:linear-gradient(90deg,rgba(201,168,106,.28),rgba(201,168,106,.10));outline:2px solid #d7b979;outline-offset:-2px;box-shadow:inset 4px 0 0 #d7b979}
+.result.selected b,.result.selected strong{color:#f2d69b}.result.selected small{color:#e0d2b5}
+.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.03em}th,td{padding:9px 6px;border-bottom:1px solid #edf0f4;vertical-align:middle}
+td input{padding:7px 6px;min-width:65px}td .name{min-width:150px}.num{text-align:right;white-space:nowrap}
+.totals{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.grand{font-size:21px;font-weight:750;color:var(--navy)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.actions button{flex:1}
+.status{font-size:12px;color:var(--green);min-height:18px;margin-top:8px}
+.item-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.catalog-tools{margin-top:12px;padding:12px;border:1px dashed #b9c7d9;border-radius:10px;background:#f8fafc}.catalog-tools summary{font-weight:700;cursor:pointer;color:var(--blue)}.catalog-tools .fields{margin-top:12px}
+@media(max-width:760px){.wrap{padding:10px}.layout{grid-template-columns:1fr}header{padding:14px 16px}.fields{grid-template-columns:1fr 1fr}.card{padding:13px}.actions button{flex:1 1 42%}}
+@media print{body{background:white}header,.no-print,.remove{display:none!important}.wrap{max-width:none;padding:0}.layout{display:block}.card{box-shadow:none;border:0;padding:0;margin-bottom:15px}.card.builder{display:none}input{border:0;padding:0}table{font-size:11px}th,td{padding:6px 4px}.print-only{display:block!important}}
+.print-only{display:none}
+
+/* Nowoczesny wygląd BUD-WEL: grafit, ciepłe złoto, wyraźne karty */
+:root{
+  --navy:#171a18; --blue:#c9a86a; --bg:#111411; --line:#3a403a;
+  --muted:#a9afa6; --green:#c9a86a;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:
+    radial-gradient(ellipse at 12% 0%,rgba(201,168,106,.12),transparent 34rem),
+    linear-gradient(145deg,#111411 0%,#191d19 55%,#121512 100%);
+  color:#f4f1e9;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  letter-spacing:.005em;
+}
+header{
+  background:rgba(18,22,18,.94);
+  border-bottom:1px solid rgba(201,168,106,.38);
+  box-shadow:0 10px 35px rgba(0,0,0,.24);
+  padding-top:20px;padding-bottom:20px;
+  backdrop-filter:blur(12px);
+}
+header h1{font-size:22px;letter-spacing:.02em}
+header h1:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#d9b879;margin:0 10px 3px 0;box-shadow:0 0 14px #d9b879}
+header small{color:#c9c4b8}
+.wrap{padding-top:24px;padding-bottom:40px}
+.layout{gap:18px}
+.card{
+  background:linear-gradient(155deg,rgba(39,44,39,.98),rgba(29,33,29,.98));
+  border:1px solid rgba(201,168,106,.19);
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 14px 38px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.025);
+}
+h2{font-size:17px;font-weight:750;letter-spacing:.01em;color:#f5f0e5}
+h2:after{content:"";display:block;width:34px;height:2px;background:#c9a86a;margin-top:9px;border-radius:2px}
+label{color:#d8c59e;font-size:12px;letter-spacing:.025em}
+input,select,textarea{
+  background:#191e19;color:#f5f2ea;border:1px solid #454d43;
+  border-radius:11px;padding:12px 13px;transition:border-color .18s,box-shadow .18s,background .18s;
+}
+input:hover,select:hover,textarea:hover{border-color:#8e7952}
+input:focus,select:focus,textarea:focus{
+  outline:0;border-color:#d0ae70;box-shadow:0 0 0 3px rgba(201,168,106,.15);background:#1c221c
+}
+button{
+  background:linear-gradient(135deg,#d7b979,#b99558);color:#171913;
+  border:1px solid #e1c88f;border-radius:11px;padding:12px 16px;
+  font-weight:750;box-shadow:0 5px 14px rgba(0,0,0,.18);
+  transition:transform .16s,filter .16s,box-shadow .16s
+}
+button:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.24)}
+button:active{transform:translateY(0)}
+button.secondary{background:#303830;color:#e5d4ad;border:1px solid #59604f;box-shadow:none}
+button.secondary:hover{background:#3a4439}
+button.green{background:linear-gradient(135deg,#d7b979,#b99558);color:#171913}
+button.danger{background:#482d2a;color:#ffd9d2;border-color:#80504a;box-shadow:none}
+.catalog-tools{
+  background:rgba(18,23,18,.72);border:1px solid rgba(201,168,106,.34);
+  border-radius:14px;padding:15px
+}
+.catalog-tools summary{color:#e0c38b;font-weight:750;padding:3px 0}
+.results{
+  background:#171c17;border:1px solid #41483f;border-radius:13px;
+  box-shadow:inset 0 1px 5px rgba(0,0,0,.18)
+}
+.result{color:#f2efe7;border-bottom:1px solid #333b33;padding:13px 14px;transition:background .15s}
+.result:hover{background:#2b332a}
+.result b{color:#e1c38b}
+.result small,.muted{color:#a9afa6}
+.tablewrap{border:1px solid #3a403a;border-radius:13px;overflow-x:auto}
+table{background:rgba(20,24,20,.4)}
+th{background:#202720;color:#d8bd86;padding-top:12px;padding-bottom:12px}
+th,td{border-bottom:1px solid #373e36}
+td input{background:#171c17}
+.totals{border-top:1px solid #515044;padding-top:16px}
+.grand{color:#e2c487}
+.status{color:#d9bd83}
+.fields{gap:12px}
+.actions{gap:10px}
+.actions button{min-height:43px}
+::placeholder{color:#81877e;opacity:1}
+select option{background:#1c221c;color:#f5f2ea}
+@media(max-width:760px){
+  .wrap{padding:12px}
+  .card{padding:16px;border-radius:15px}
+  header{padding:16px}
+  .layout{gap:12px}
+  button{min-height:44px}
+}
+@media print{
+  body{background:white;color:#111}
+  .card{background:white;color:#111;border:0;box-shadow:none}
+  h2,th,td,.grand{color:#111}
+}
+
+
+.app-nav{display:flex;gap:8px;margin:0 0 18px;padding:5px;background:#1b201b;border:1px solid rgba(201,168,106,.24);border-radius:14px;width:max-content;max-width:100%}
+.app-nav .nav-btn{background:transparent;color:#c9c4b8;border:1px solid transparent;box-shadow:none;padding:10px 20px}
+.app-nav .nav-btn.active{background:linear-gradient(135deg,#d7b979,#b99558);color:#171913;border-color:#e1c88f}
+.settings-view{margin-top:0}
+.settings-grid{display:grid;grid-template-columns:minmax(280px,.9fr) minmax(0,1.1fr);gap:18px;align-items:start}
+.settings-editor,.settings-tree{min-width:0}
+.settings-editor h3,.settings-tree h3{font-size:15px;color:#e2c487;margin:14px 0}
+.settings-tree{border:1px solid #454d43;border-radius:14px;padding:15px;background:#171c17}
+.catalog-tree{max-height:72vh;overflow:auto;padding-right:4px}
+.tree-category{border:1px solid #41483f;border-radius:10px;margin:0 0 9px;background:#202720;overflow:hidden}
+.tree-category>summary,.tree-subcategory>summary{padding:11px 12px;display:flex;gap:8px;align-items:center;cursor:pointer;list-style:none;color:#eee5d3;font-weight:700}
+.tree-category>summary::-webkit-details-marker,.tree-subcategory>summary::-webkit-details-marker{display:none}
+.tree-category>summary small,.tree-subcategory>summary small{margin-left:auto;color:#b8b3a6;font-size:11px;font-weight:500}
+.tree-subcategory{margin:0 8px 8px;border-left:2px solid #b99558;background:#191f19;border-radius:0 8px 8px 0}
+.tree-subcategory>summary{font-size:13px;color:#d8c59e}
+.tree-subcategory ul{list-style:none;margin:0;padding:0 12px 9px 28px}
+.tree-subcategory li{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #343b33;font-size:12px;color:#f2efe7}
+.tree-subcategory li small{color:#b8b3a6;white-space:nowrap}
+.tree-empty{color:#9b9b91!important}
+.settings-hint{margin:10px 0 0;padding:11px 12px;border:1px dashed #8d784e;border-radius:10px}
+.manual-settings{margin-top:14px}
+[hidden]{display:none!important}
+@media(max-width:760px){.settings-grid{grid-template-columns:1fr}.app-nav{width:100%}.app-nav .nav-btn{flex:1}}
+
+
+.contractor-manager{border:1px solid rgba(201,168,106,.32);background:#171c17;border-radius:15px;padding:16px;margin:14px 0 20px}
+.contractor-manager h3{font-size:16px;color:#e2c487;margin:0 0 7px}
+.contractor-list{margin-top:14px;display:grid;gap:8px}
+.contractor-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid #3f473e;border-radius:11px;background:#202720}
+.contractor-row b{color:#f2e8d2}
+.contractor-row small{display:block;color:#a9afa6;font-size:12px;line-height:1.6;margin-top:3px}
+.contractor-actions{display:flex;gap:6px;flex-shrink:0}
+.contractor-actions button{padding:8px 10px;font-size:12px}
+@media(max-width:600px){.contractor-row{align-items:flex-start;flex-direction:column}.contractor-actions{width:100%}.contractor-actions button{flex:1}}
+
+
+.catalog-price-list{display:grid;gap:7px;padding:8px 4px 12px}.catalog-price-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px;border:1px solid var(--line,#333);border-radius:10px;background:rgba(255,255,255,.025)}.catalog-price-row>div{min-width:0}.catalog-price-row b{display:block;font-size:13px;line-height:1.35}.catalog-price-row small{display:block;color:var(--muted,#aaa);margin-top:3px}.price-edit{display:flex;align-items:center;gap:7px;flex:0 0 125px;font-size:11px;color:var(--muted,#aaa)}.price-edit input{width:86px;min-width:0;padding:8px;border-radius:8px;border:1px solid var(--line,#555);background:#111;color:#fff;text-align:right}@media(max-width:520px){.catalog-price-row{align-items:flex-start}.price-edit{flex-direction:column;align-items:flex-end;flex-basis:82px}.price-edit input{width:82px}}
+
+
+/* Wydruk wyceny – układ dokumentu BUD-WEL */
+#printDocument{display:none}
+@media print{
+  @page{size:A4;margin:14mm 15mm}
+  html,body{background:#fff!important;color:#171717!important;font-family:Arial,Helvetica,sans-serif!important}
+  body{margin:0!important}
+  header,.app-nav,.no-print,#costsView,#settingsView,.item-head,.tablewrap,.totals,#printFooter{display:none!important}
+  .wrap,#quoteView,.layout{display:block!important;max-width:none!important;margin:0!important;padding:0!important}
+  #quoteView .card{display:block!important;background:#fff!important;color:#171717!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;margin:0!important}
+  #printDocument{display:block!important;color:#171717!important;font-size:10pt}
+  .print-head{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #202020;padding-bottom:12px;margin-bottom:18px}
+  .print-brand{display:flex;align-items:center;gap:13px}
+  .print-brand img{width:82px;height:70px;object-fit:contain}
+  .print-brand strong{display:block;font-size:22pt;letter-spacing:1px}
+  .print-brand span{display:block;font-size:11pt;letter-spacing:2px;margin-top:4px}
+  .print-number{text-align:right;font-size:9pt;line-height:1.9}
+  .print-client{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin:0 0 20px}
+  .print-client div{min-height:34px;border-bottom:1px solid #d7d7d7;padding:0 0 5px}
+  .print-client b{display:block;font-size:8pt;color:#555;margin-bottom:3px;text-transform:uppercase}
+  .print-client span{display:block;font-size:9.5pt;overflow-wrap:anywhere}
+  .print-table{width:100%;border-collapse:collapse;font-size:9pt;margin-top:8px}
+  .print-table th{background:#ededed!important;color:#171717!important;text-transform:none;letter-spacing:0;font-size:8pt;font-weight:bold;border-top:1px solid #333;border-bottom:1px solid #333;padding:8px 6px}
+  .print-table td{color:#171717!important;border-bottom:1px solid #ddd;padding:8px 6px;vertical-align:top}
+  .print-table .p-qty,.print-table .p-unit{text-align:center;white-space:nowrap}
+  .print-table .p-price,.print-table .p-value{text-align:right;white-space:nowrap}
+  .print-summary{width:58%;margin:18px 0 0 auto;font-size:9pt}
+  .print-summary div{display:flex;justify-content:space-between;gap:20px;padding:5px 7px;border-bottom:1px solid #ddd}
+  .print-summary .p-total{font-size:12pt;font-weight:bold;border-top:2px solid #222;border-bottom:2px solid #222;margin:4px 0}
+  .print-notes{margin-top:22px;font-size:9pt;white-space:pre-wrap}
+  .print-notes:empty{display:none}
+  .print-signatures{display:flex;justify-content:space-between;margin-top:55px;text-align:center;font-size:8pt}
+}
+
+/* Ostateczny wydruk: jedna czytelna strona A4, bez formularza aplikacji */
+@media print {
+  @page { size: A4 portrait; margin: 8mm; }
+  html, body { width: 100% !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; background: #fff !important; color: #111 !important; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body * { visibility: hidden !important; }
+  #printDocument, #printDocument * { visibility: visible !important; }
+  #printDocument {
+    display: block !important; position: absolute !important; left: 0 !important; top: 0 !important;
+    width: 100% !important; margin: 0 !important; padding: 0 !important;
+    color: #111 !important; background: #fff !important; font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 8pt !important; line-height: 1.15 !important;
+    page-break-before: avoid !important; page-break-after: avoid !important; break-inside: avoid-page !important;
+  }
+  .print-head { display:flex !important; align-items:center !important; justify-content:space-between !important;
+    border-bottom:1px solid #777 !important; padding:0 0 4mm !important; margin:0 0 4mm !important; }
+  .print-brand { display:flex !important; align-items:center !important; gap:7mm !important; }
+  .print-brand img { width:22mm !important; height:17mm !important; object-fit:contain !important; }
+  .print-brand strong { display:block !important; font-size:15pt !important; letter-spacing:.5px !important; }
+  .print-brand span { display:block !important; font-size:9pt !important; letter-spacing:1px !important; margin-top:1mm !important; }
+  .print-number { text-align:right !important; font-size:8pt !important; line-height:1.5 !important; }
+  .print-client { display:grid !important; grid-template-columns:1fr 1fr !important; gap:2mm 7mm !important; margin:0 0 4mm !important; }
+  .print-client div { min-height:0 !important; border-bottom:1px solid #ccc !important; padding:0 0 1.5mm !important; overflow-wrap:anywhere !important; }
+  .print-client b { display:block !important; font-size:6.5pt !important; color:#444 !important; margin-bottom:1mm !important; text-transform:uppercase !important; }
+  .print-client span { display:block !important; font-size:7.5pt !important; }
+  .print-table { width:100% !important; border-collapse:collapse !important; table-layout:fixed !important; font-size:7.2pt !important; margin:0 !important; }
+  .print-table th { background:#f0f0f0 !important; color:#111 !important; border:1px solid #aaa !important; padding:1.5mm 1mm !important; font-size:6.8pt !important; }
+  .print-table td { color:#111 !important; border:1px solid #ccc !important; padding:1.1mm 1mm !important; line-height:1.12 !important; vertical-align:top !important; overflow-wrap:anywhere !important; }
+  .print-table th:nth-child(1), .print-table td:nth-child(1) { width:10mm !important; }
+  .print-table th:nth-child(2), .print-table td:nth-child(2) { width:12mm !important; }
+  .print-table th:nth-child(4), .print-table td:nth-child(4) { width:23mm !important; }
+  .print-table th:nth-child(5), .print-table td:nth-child(5) { width:24mm !important; }
+  .print-table .p-qty,.print-table .p-unit { text-align:center !important; white-space:nowrap !important; }
+  .print-table .p-price,.print-table .p-value { text-align:right !important; white-space:nowrap !important; }
+  .print-summary { width:55% !important; margin:4mm 0 0 auto !important; font-size:7.5pt !important; }
+  .print-summary div { display:flex !important; justify-content:space-between !important; gap:4mm !important; padding:1mm 1.5mm !important; border-bottom:1px solid #ddd !important; }
+  .print-summary .p-total { font-size:10pt !important; font-weight:bold !important; border-top:1.5px solid #222 !important; border-bottom:1.5px solid #222 !important; margin:1mm 0 !important; }
+  .print-notes { margin-top:3mm !important; font-size:7pt !important; white-space:pre-wrap !important; }
+  .print-signatures { display:none !important; }
+  tr { break-inside:avoid !important; page-break-inside:avoid !important; }
+}
+/* W aplikacji dane wyceny są na samej górze, a dodawanie usług bezpośrednio pod nimi. */
+@media screen{
+  #quoteView .layout{display:flex;flex-direction:column;align-items:stretch;gap:14px}
+  #quoteView .quote-data,#quoteView .quote-builder{width:100%;margin:0}
+}
+
+/* Naprawa podglądu wydruku: drukujemy wyłącznie dokument, bez ukrytych ekranów aplikacji */
+@media print {
+  @page { size: A4 portrait; margin: 8mm; }
+  html, body { display:block !important; width:auto !important; height:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; overflow:visible !important; background:#fff !important; }
+  body > header, body > .wrap > .app-nav, body > .wrap > #costsView, body > .wrap > #settingsView, body > .wrap > p { display:none !important; }
+  body > .wrap { display:block !important; position:static !important; width:auto !important; max-width:none !important; height:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; overflow:visible !important; }
+  #quoteView { display:block !important; position:static !important; height:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; overflow:visible !important; }
+  #quoteView .layout { display:block !important; position:static !important; height:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; overflow:visible !important; }
+  #quoteView .quote-data { display:none !important; }
+  #quoteView .print-card { display:block !important; position:static !important; width:auto !important; height:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; border:0 !important; box-shadow:none !important; background:#fff !important; overflow:visible !important; }
+  #quoteView .print-card > :not(#printDocument) { display:none !important; }
+  #printDocument { display:block !important; position:static !important; width:100% !important; height:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; overflow:visible !important; page-break-before:avoid !important; page-break-after:avoid !important; break-before:avoid-page !important; break-after:avoid-page !important; }
+  #printDocument * { visibility:visible !important; }
+  #printDocument table, #printDocument tr { break-inside:avoid !important; page-break-inside:avoid !important; }
+}
+
+
+/* Terminarz zleceń */
+.calendar-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0 14px}
+.calendar-toolbar .month-title{font-size:20px;font-weight:800;color:#e2c487;text-transform:capitalize;min-width:180px;text-align:center}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid #454d43;border-radius:12px;overflow:hidden;background:#171c17}
+.calendar-weekday{padding:9px 4px;text-align:center;font-size:11px;font-weight:750;color:#d8c59e;background:#202720;border-right:1px solid #3a403a;border-bottom:1px solid #454d43}
+.calendar-day{min-height:112px;padding:6px;border-right:1px solid #343b33;border-bottom:1px solid #343b33;min-width:0;background:#171c17}
+.calendar-day.outside{opacity:.42;background:#111511}.calendar-day.today{box-shadow:inset 0 0 0 2px #c9a86a}
+.calendar-day-number{font-size:12px;color:#c9c4b8;margin-bottom:5px}
+.calendar-event{display:block;width:100%;text-align:left;white-space:normal;overflow:hidden;text-overflow:ellipsis;font-size:10px;line-height:1.25;padding:5px 6px;margin:3px 0;border-radius:6px;background:#4a402b;color:#f7e6bf;border:1px solid #9f824d;box-shadow:none}
+.calendar-event.status-w-trakcie{background:#24483a;border-color:#4f9474;color:#d8f4e6}.calendar-event.status-zakończone{background:#303630;border-color:#687266;color:#d6ddd3}
+.calendar-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}.calendar-form .wide{grid-column:1/-1}
+.calendar-list{display:grid;gap:8px;margin-top:14px}.calendar-list-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px;border:1px solid #41483f;border-radius:10px;background:#202720}.calendar-list-row small{display:block;color:#b8b3a6;margin-top:4px}.calendar-list-actions{display:flex;gap:6px;flex-shrink:0}
+@media(max-width:700px){.calendar-day{min-height:82px;padding:4px}.calendar-event{font-size:9px;padding:4px}.calendar-form{grid-template-columns:1fr}.calendar-form .wide{grid-column:auto}.calendar-list-row{align-items:flex-start;flex-direction:column}.calendar-list-actions{width:100%}.calendar-list-actions button{flex:1}}
+@media print{#calendarView{display:none!important}}
+
+/* Uporządkowany interfejs: mniej elementów naraz, pełna szerokość na iPadzie */
+@media screen and (min-width:761px){
+  .wrap{max-width:none;width:100%;padding-left:clamp(16px,2.2vw,34px);padding-right:clamp(16px,2.2vw,34px)}
+  #settingsView{width:100%;max-width:none}
+  .settings-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;width:100%}
+  .settings-editor,.settings-tree{width:100%;min-width:0}
+  .settings-tree{padding:18px}
+  .catalog-price-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+}
+.settings-view{width:100%;max-width:none}
+.settings-section,.soft-panel{display:block;width:100%;border:1px solid rgba(201,168,106,.30);border-radius:15px;background:rgba(18,23,18,.48);padding:15px;margin:12px 0}
+.settings-section>summary,.soft-panel>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:#e7d2a4;font-weight:750;font-size:16px;min-height:34px}
+.settings-section>summary::-webkit-details-marker,.soft-panel>summary::-webkit-details-marker{display:none}
+.settings-section>summary:before,.soft-panel>summary:before{content:'＋';display:inline-grid;place-items:center;width:26px;height:26px;border-radius:8px;background:rgba(201,168,106,.16);color:#e2c487}
+.settings-section[open]>summary:before,.soft-panel[open]>summary:before{content:'−'}
+.section-title{color:#e2c487}.section-hint{font-size:12px;font-weight:450;color:#a9afa6}
+.settings-section[open]>summary,.soft-panel[open]>summary{margin-bottom:14px}
+.quote-details{margin-top:10px;padding:12px}.quote-details>summary{font-weight:650;color:#e2c487;cursor:pointer;list-style:none}.quote-details>summary::-webkit-details-marker{display:none}
+.quote-details>summary:before{content:'＋ ';font-weight:800}.quote-details[open]>summary:before{content:'− '}
+.settings-editor .catalog-tools{width:100%}
+.settings-editor .manual-settings{margin-top:14px}
+.settings-tree .catalog-tree{max-height:none;overflow:visible}
+.settings-tree .tree-category{width:100%}
+.catalog-price-row{min-width:0}
+.contractor-manager{width:100%}
+@media(max-width:760px){
+ .wrap{max-width:none;width:100%;padding:10px}
+ #settingsView{width:100%;padding:14px}
+ .settings-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+ .settings-section,.soft-panel{padding:12px}
+ .catalog-price-list{grid-template-columns:1fr}
+}
+
+</style></head><body>
+<header><div class="brand"><img class="brand-logo" src="logo-bud-wel.png" alt="Logo BUD-WEL"><div class="brand-copy"><h1>BUD-WEL · Wyceny</h1><small>Prosty kosztorys robocizny</small></div></div></header>
+<div class="wrap"><nav class="app-nav no-print" aria-label="Nawigacja">
+<button type="button" class="nav-btn active" id="tabQuote">Wycena</button>
+<button type="button" class="nav-btn" id="tabCosts">Koszty</button>
+<button type="button" class="nav-btn" id="tabCalendar">Terminarz</button>
+<button type="button" class="nav-btn" id="tabSettings">Ustawienia</button>
+</nav>
+<div id="quoteView"><div class="layout">
+<section class="card no-print quote-data">
+<h2>Dane wyceny</h2>
+<details class="soft-panel quote-details"><summary>Dane klienta, numer, rabat i uwagi</summary>
+<div class="fields">
+<div style="grid-column:1/-1"><label>Wybierz kontrahenta z bazy</label><select id="contractorSelect"><option value="">— wybierz kontrahenta lub wpisz dane ręcznie —</option></select></div>
+<div><label>Klient / inwestor</label><input id="client" placeholder="Imię i nazwisko / firma"></div>
+<div><label>Miejsce budowy</label><input id="place" placeholder="Adres inwestycji"></div>
+<div><label>Telefon kontrahenta</label><input id="clientPhone" placeholder="Numer telefonu"></div>
+<div><label>E-mail kontrahenta</label><input id="clientEmail" type="email" placeholder="Adres e-mail"></div>
+<div><label>Adres kontrahenta</label><input id="clientAddress" placeholder="Ulica, kod, miejscowość"></div>
+<div><label>Numer wyceny</label><input id="number" placeholder="np. W-001"></div>
+<div><label>Data</label><input id="date" type="date"></div>
+</div>
+<div class="fields"><div><label>Rabat całkowity (%)</label><input id="discount" type="number" min="0" max="100" step=".5" value="0"></div><div><label>Zaliczka (zł)</label><input id="advance" type="number" min="0" step="1" value="0"></div></div>
+<label>Uwagi / zakres prac</label><textarea id="notes" rows="2" placeholder="Dodatkowe ustalenia..."></textarea>
+<div class="actions"><button class="secondary" id="save">Zapisz wycenę</button><button class="secondary" id="load">Wczytaj zapisaną</button></div>
+<div class="actions"><button class="secondary" id="export">Eksport kopii</button><button class="secondary" id="importBtn">Import kopii</button><input id="importFile" type="file" accept="application/json" hidden></div>
+<div class="status" id="status"></div>
+</details>
+</section>
+
+<section class="card builder no-print quote-builder">
+<h2>Dodaj usługę do wyceny</h2>
+<div class="fields"><div><label>Kategoria</label><select id="category"></select></div><div><label>Podkategoria</label><select id="subcategory"></select></div><div style="grid-column:1/-1"><label>Szukaj usługi</label><input id="search" placeholder="np. gruntowanie, płytki..."></div></div>
+<p class="muted settings-hint">Zarządzanie kategoriami i cennikiem znajduje się w zakładce „Ustawienia”.</p>
+<div class="muted">Wybierz usługę z cennika. Cena i jednostka zostaną pobrane automatycznie.</div><div id="results" class="results"></div>
+<div class="addrow" style="margin-top:12px"><div><label>Ilość</label><input id="qty" type="number" min="0" step="0.01" value="1"></div><div style="display:flex;align-items:end"><button id="add" class="green" style="width:100%" disabled>+ Dodaj pozycję</button></div></div>
+<div id="selected" class="muted" style="margin-top:8px">Nie wybrano usługi.</div>
+</div>
+</section>
+
+
+<section class="card print-card" style="grid-column:1/-1">
+<div id="printDocument" class="print-only">
+  <div class="print-head">
+    <div class="print-brand"><a href="https://budwel-coder.github.io/bud-wel-wycena-/" aria-label="Otwórz aplikację BUD-WEL" style="display:inline-flex;align-items:center;gap:13px;text-decoration:none;color:inherit"><img src="logo-bud-wel.png" alt="BUD-WEL"><span style="display:flex;flex-direction:column;color:#171717"><strong>BUD-WEL</strong><span>WYCENA PRAC</span></span></a></div>
+    <div class="print-number"><b>WYCENA NR:</b> <span id="pNumber">—</span><br><b>DATA:</b> <span id="pDate">—</span></div>
+  </div>
+  <div class="print-client">
+    <div><b>Klient / inwestor</b><span id="pClient">—</span></div>
+    <div><b>Miejsce wykonania prac</b><span id="pPlace">—</span></div>
+    <div><b>Adres</b><span id="pAddress">—</span></div>
+    <div><b>Telefon</b><span id="pPhone">—</span></div>
+    <div><b>E-mail</b><span id="pEmail">—</span></div>
+  </div>
+  <table class="print-table">
+    <thead><tr><th class="p-qty">Ilość</th><th class="p-unit">J.m.</th><th>Opis prac</th><th class="p-price">Cena jedn.</th><th class="p-value">Wartość</th></tr></thead>
+    <tbody id="printLines"></tbody>
+  </table>
+  <div class="print-summary">
+    <div><span>Wartość przed rabatem</span><b id="pSubtotal">0,00 zł</b></div>
+    <div><span>Rabat</span><b id="pDiscount">0,00 zł</b></div>
+    <div class="p-total"><span>RAZEM DO ZAPŁATY</span><b id="pTotal">0,00 zł</b></div>
+    <div><span>Zaliczka</span><b id="pAdvance">0,00 zł</b></div>
+    <div><span>Pozostało do zapłaty</span><b id="pRemaining">0,00 zł</b></div>
+  </div>
+  <div id="pNotes" class="print-notes"></div>
+  <div class="print-signatures"><span>........................................<br>Podpis wykonawcy</span><span>........................................<br>Podpis klienta</span></div>
+</div>
+<div class="item-head no-print"><h2>Pozycje kosztorysu</h2><button class="secondary" id="clear">Wyczyść pozycje</button></div>
+<div class="tablewrap"><table><thead><tr><th>Usługa</th><th>J.m.</th><th>Ilość</th><th>Cena</th><th>Wartość</th><th class="no-print"></th></tr></thead><tbody id="lines"><tr><td colspan="6" class="muted">Nie dodano jeszcze żadnych usług.</td></tr></tbody></table></div>
+<div class="totals"><span>Wartość przed rabatem</span><b id="subtotal">0,00 zł</b><span>Rabat</span><b id="discountValue">0,00 zł</b><span class="grand">Do zapłaty</span><b class="grand" id="total">0,00 zł</b><span>Zaliczka</span><b id="advanceValue">0,00 zł</b><span>Pozostało</span><b id="remaining">0,00 zł</b></div>
+<div class="actions no-print"><button id="pdf">Drukuj / Zapisz PDF</button></div>
+<div class="print-only" id="printFooter"></div>
+</section></div></div>
+<section id="calendarView" class="card" hidden>
+ <div class="item-head"><div><h2>Terminarz zleceń</h2><p class="muted">Miesięczny kalendarz wszystkich zaplanowanych prac. Kliknij zlecenie, aby je edytować.</p></div><button type="button" class="green" id="newAppointment">+ Nowe zlecenie</button></div>
+ <div class="calendar-toolbar">
+  <button type="button" class="secondary" id="calendarPrev">‹ Poprzedni</button>
+  <div class="month-title" id="calendarMonth">—</div>
+  <button type="button" class="secondary" id="calendarNext">Następny ›</button>
+  <button type="button" class="secondary" id="calendarToday">Dzisiaj</button>
+ </div>
+ <div class="calendar-grid" id="calendarGrid"></div>
+ <div class="contractor-manager">
+  <h3 id="appointmentFormTitle">Dodaj zlecenie do terminarza</h3>
+  <div class="calendar-form">
+   <div><label>Klient / nazwa zlecenia</label><input id="apTitle" placeholder="np. Remont łazienki – Kowalski"></div>
+   <div><label>Adres inwestycji</label><input id="apPlace" placeholder="Miejscowość, ulica"></div>
+   <div><label>Data rozpoczęcia</label><input id="apStart" type="date"></div>
+   <div><label>Data zakończenia</label><input id="apEnd" type="date"></div>
+   <div><label>Status</label><select id="apStatus"><option value="Zaplanowane">Zaplanowane</option><option value="W trakcie">W trakcie</option><option value="Zakończone">Zakończone</option></select></div>
+   <div><label>Numer wyceny (opcjonalnie)</label><input id="apQuote" placeholder="np. W-001"></div>
+   <div class="wide"><label>Uwagi</label><textarea id="apNotes" rows="2" placeholder="Zakres prac, ustalenia..."></textarea></div>
+  </div>
+  <div class="actions"><button type="button" id="saveAppointment">Zapisz zlecenie</button><button type="button" class="secondary" id="cancelAppointment">Wyczyść</button></div>
+  <div class="muted" id="appointmentStatus" style="margin-top:8px"></div>
+ </div>
+ <h3 style="color:#e2c487;margin:18px 0 8px">Zlecenia w wybranym miesiącu</h3>
+ <div class="calendar-list" id="calendarList"></div>
+</section>
+<section id="costsView" class="card" hidden>
+<h2>Koszty realizacji zlecenia</h2>
+<p class="muted">Tutaj ustawiasz i sprawdzasz wszystkie koszty dojazdu, paliwa, kosztów stałych oraz wydatków dodatkowych. Nie są one widoczne na głównym ekranie wyceny.</p>
+<section class="card no-print" style="grid-column:1/-1" id="costPanel">
+<h2>Koszty realizacji zlecenia</h2>
+<p class="muted">Koszty liczone osobno od oferty dla klienta. Odległość pobierana jest z wybranego kontrahenta, a paliwo liczone za dojazd w obie strony każdego dnia.</p>
+<div class="fields">
+ <div><label>Liczba dni roboczych zlecenia</label><input id="jobDays" type="number" min="0" step="1" value="1"></div>
+ <div><label>Dni robocze w miesiącu</label><input id="workDaysMonth" type="number" min="1" step="1" value="20"></div>
+ <div><label>Łączne miesięczne koszty stałe firmy (zł)</label><input id="monthlyFixed" type="number" min="0" step="0.01" value="0" readonly></div>
+ <div><label>Przypisana część kosztów stałych</label><input id="fixedAllocated" readonly value="0,00 zł"></div>
+ <div><label>Pojazd</label><input id="vehicleName" placeholder="np. bus / samochód firmowy"></div>
+ <div><label>Spalanie (l/100 km)</label><input id="fuelConsumption" type="number" min="0" step="0.1" value="8"></div>
+ <div><label>Cena paliwa (zł/l)</label><input id="fuelPrice" type="number" min="0" step="0.01" value="6.50"></div>
+ <div><label>Odległość do klienta w jedną stronę (km)</label><input id="jobDistance" type="number" min="0" step="0.1" value="0"></div>
+ <div><label>Łączna trasa (km) – tam i z powrotem</label><input id="totalKm" readonly value="0 km"></div>
+ <div><label>Koszt paliwa</label><input id="fuelCost" readonly value="0,00 zł"></div>
+ <div><label>Inne koszty (opis)</label><input id="otherCostName" placeholder="np. nocleg, parking, eksploatacja"></div>
+ <div><label>Inne koszty (zł)</label><input id="otherCostAmount" type="number" min="0" step="0.01" value="0"></div>
+</div>
+<div class="contractor-manager" style="margin-top:16px">
+ <h3>Miesięczne koszty stałe firmy</h3>
+ <p class="muted">Wpisz każdą opłatę osobno. Możesz je zmieniać, dodawać i usuwać, gdy zmienią się rachunki. Suma zostanie automatycznie rozliczona proporcjonalnie do dni roboczych zlecenia.</p>
+ <div id="fixedCostRows" class="contractor-list"></div>
+ <div class="actions"><button type="button" class="secondary" id="addFixedCost">+ Dodaj koszt stały</button></div>
+</div>
+<div class="totals">
+ <span>Koszty stałe przypisane do zlecenia</span><b id="costFixedOut">0,00 zł</b>
+ <span>Paliwo</span><b id="costFuelOut">0,00 zł</b>
+ <span>Inne koszty</span><b id="costOtherOut">0,00 zł</b>
+ <span class="grand">Łączne koszty realizacji</span><b class="grand" id="costTotalOut">0,00 zł</b>
+ <span>Przewidywany zysk po kosztach</span><b class="grand" id="profitOut">0,00 zł</b>
+</div>
+</section>
+</section>
+<section id="settingsView" class="card settings-view" hidden>
+  <h2>Ustawienia i baza danych</h2>
+  <p class="muted">Zarządzanie cennikiem jest tutaj oddzielone od codziennego tworzenia wycen.</p>
+  <details class="settings-section"><summary><span class="section-title">Baza klientów i kontrahentów</span><span class="section-hint">Dane kontaktowe i odległości</span></summary>
+  <section class="contractor-manager">
+    <h3>Baza kontrahentów</h3>
+    <p class="muted">Dodaj klienta raz, a przy kolejnej wycenie wybierz go z listy. Dane zostaną automatycznie uzupełnione.</p>
+    <div class="fields">
+      <div><label>Nazwa / imię i nazwisko</label><input id="conName" placeholder="np. Jan Kowalski / Firma ABC"></div>
+      <div><label>Telefon</label><input id="conPhone" type="tel" placeholder="Telefon kontaktowy"></div>
+      <div><label>E-mail</label><input id="conEmail" type="email" placeholder="Adres e-mail"></div>
+      <div><label>Adres</label><input id="conAddress" placeholder="Ulica, kod pocztowy, miejscowość"></div>
+      <div><label>Odległość od bazy (km, w jedną stronę)</label><input id="conDistance" type="number" min="0" step="0.1" placeholder="np. 30"></div>
+    </div>
+    <div class="actions"><button id="saveContractor" type="button">+ Zapisz kontrahenta</button><button class="secondary" id="clearContractorForm" type="button">Wyczyść formularz</button></div>
+    <div id="contractorList" class="contractor-list"></div>
+  </section>
+  </details>
+  <div class="settings-grid">
+    <div class="settings-editor">
+      <details class="settings-section"><summary><span class="section-title">Cennik usług</span><span class="section-hint">Dodawanie kategorii, podkategorii i usług</span></summary>
+      <details class="catalog-tools"><summary>+ Dodaj kategorię lub nową usługę do cennika</summary>
+<div class="fields"><div><label>Wybierz istniejącą kategorię</label><select id="settingsCategorySelect"></select></div><div><label>Wybierz podkategorię</label><select id="settingsSubcategorySelect"></select></div></div>
+<div class="fields"><div><label>Lub utwórz nową kategorię</label><input id="newCategory" placeholder="np. Remonty łazienek"></div><div style="display:flex;align-items:end"><button id="createCategory" type="button" style="width:100%">+ Utwórz kategorię</button></div></div>
+<div class="fields"><div><label>Nowa podkategoria w wybranej kategorii</label><input id="newSubcategory" placeholder="np. Gruntowanie przed malowaniem"></div><div style="display:flex;align-items:end"><button id="createSubcategory" type="button" style="width:100%">+ Dodaj podkategorię</button></div></div>
+<div class="muted" style="margin:10px 0">Dodaj usługę do wybranej podkategorii:</div>
+<div class="fields"><div><label>Nazwa usługi</label><input id="newService" placeholder="np. Gruntowanie ścian"></div><div><label>Jednostka</label><input id="newUnit" placeholder="m², mb, szt."></div><div><label>Cena robocizny (zł)</label><input id="newPrice" type="number" min="0" step="0.01" placeholder="np. 120"></div><div style="display:flex;align-items:end"><button id="createService" class="green" type="button" style="width:100%">+ Dodaj usługę</button></div></div>
+<div class="muted">Nowe kategorie i usługi zapisują się w tej przeglądarce na tym urządzeniu.</div></details>
+      <details class="soft-panel manual-settings"><summary>Dodaj własną pozycję do bieżącej wyceny</summary>
+        <div class="catalog-tools">
+        <b>Pozycja tylko do tej wyceny</b>
+        <div class="catalog-tools" style="margin-top:14px">
+  <b>Dodaj własną pozycję bezpośrednio do tej wyceny</b>
+  <div class="fields" style="margin-top:10px">
+    <div><label>Nazwa pozycji</label><input id="manualName" placeholder="np. Dodatkowe prace"></div>
+    <div><label>Jednostka</label><input id="manualUnit" placeholder="np. szt., m², godz."></div>
+    <div><label>Ilość</label><input id="manualQty" type="number" min="0.01" step="0.01" value="1"></div>
+    <div><label>Cena (zł)</label><input id="manualPrice" type="number" min="0" step="0.01" placeholder="np. 150"></div>
+  </div>
+  <button id="addManual" class="green" type="button" style="width:100%">+ Dodaj własną pozycję do wyceny</button>
+  <div class="muted" style="margin-top:6px">Ta pozycja trafi tylko do bieżącej wyceny. Nie dopisze się do cennika.</div>
+
+        </div>
+      </details>
+      </details>
+    </div>
+    <div class="settings-tree">
+      <details class="settings-section"><summary><span class="section-title">Przeglądaj i edytuj ceny</span><span class="section-hint">Wybierz kategorię, aby zobaczyć usługi</span></summary>
+      <div style="margin:10px 0"><label for="catalogCategorySelect">Wybierz kategorię</label><select id="catalogCategorySelect"></select></div>
+      <p class="muted">Po wybraniu kategorii rozwiną się jej podkategorie. Ceny możesz zmieniać bezpośrednio przy usługach.</p>
+      <div id="catalogTree" class="catalog-tree"></div>
+      </details>
+    </div>
+  </div>
+</section>
+</div>
+<script>
+const CATALOG={"Elewacja":[{"name":"Demontaż rusztowania","unit":"m²","price":15},{"name":"Docieplenie cokołu","unit":"m²","price":60},{"name":"Docieplenie fundamentów","unit":"m²","price":70},{"name":"Docieplenie ościeży","unit":"mb","price":50},{"name":"Docieplenie poddasza (wełna między krokwiami)","unit":"m²","price":70},{"name":"Docieplenie stropu","unit":"m²","price":50},{"name":"Docinanie styropianu","unit":"m²","price":10},{"name":"Dodatkowa siatka (podwójne zbrojenie)","unit":"m²","price":20},{"name":"Grunt pod tynk","unit":"m²","price":8},{"name":"Gruntowanie ścian","unit":"m²","price":8},{"name":"Hydroizolacja cokołu","unit":"m²","price":40},{"name":"Izolacja przeciwwilgociowa fundamentów","unit":"m²","price":50},{"name":"Klejenie styropianu","unit":"m²","price":50},{"name":"Klejenie styropianu grafitowego","unit":"m²","price":55},{"name":"Klejenie styropianu na sufit","unit":"m²","price":60},{"name":"Klejenie wełny mineralnej","unit":"m²","price":70},{"name":"Kołkowanie styropianu","unit":"m²","price":20},{"name":"Kołkowanie wełny","unit":"m²","price":25},{"name":"Malowanie elewacji 1x","unit":"m²","price":15},{"name":"Malowanie elewacji 2x","unit":"m²","price":25},{"name":"Montaż boni dekoracyjnych","unit":"mb","price":35},{"name":"Montaż listw przyokiennych","unit":"mb","price":20},{"name":"Montaż listwy startowej","unit":"mb","price":20},{"name":"Montaż narożników aluminiowych","unit":"mb","price":18},{"name":"Montaż okładzin elewacyjnych (np. panele)","unit":"m²","price":90},{"name":"Montaż parapetów zewnętrznych","unit":"mb","price":60},{"name":"Montaż płyt XPS","unit":"m²","price":65},{"name":"Montaż profili dylatacyjnych","unit":"mb","price":20},{"name":"Montaż rusztowania","unit":"m²","price":20},{"name":"Montaż rusztu pod elewację wentylowaną","unit":"m²","price":80},{"name":"Montaż siatki elewacyjnej","unit":"m²","price":15},{"name":"Montaż siatki przeciw gryzoniom","unit":"mb","price":15},{"name":"Montaż wełny pod elewację wentylowaną","unit":"m²","price":70},{"name":"Mycie elewacji","unit":"m²","price":12},{"name":"Obróbki blacharskie","unit":"mb","price":55},{"name":"Przygotowanie podłoża","unit":"m²","price":15},{"name":"Sprzątanie po pracach","unit":"m²","price":8},{"name":"Szlifowanie styropianu","unit":"m²","price":12},{"name":"Szlifowanie warstwy zbrojonej","unit":"m²","price":10},{"name":"Tynk akrylowy","unit":"m²","price":45},{"name":"Tynk mineralny","unit":"m²","price":40},{"name":"Tynk silikatowy","unit":"m²","price":50},{"name":"Tynk silikonowy","unit":"m²","price":55},{"name":"Wykonanie boni (cięcie w styropianie)","unit":"mb","price":25},{"name":"Wykonanie warstwy zbrojonej","unit":"m²","price":40},{"name":"Wypełnianie dylatacji","unit":"mb","price":15},{"name":"Wypełnianie szczelin pianką","unit":"mb","price":10},{"name":"Wyrównanie ścian klejem","unit":"m²","price":25},{"name":"Wzmocnienia siatką (naroża okien)","unit":"szt","price":15},{"name":"Zabezpieczenie okien i drzwi","unit":"m²","price":8}],"Malowanie":[{"name":"Gruntowanie grunt wodny warstwa 1 (same ściany tynkowane )","unit":"m2","price":3},{"name":"Gruntowanie  grunt wodny warstwa 2 ( ściany i sufity )","unit":"m2","price":3},{"name":"Gruntowanie farba-gruntująca","unit":"m2","price":10},{"name":"Impregnacja drewna 3 krotne nasycenie pędzlem","unit":"m2","price":25},{"name":"Lakierowanie (farby olejne)","unit":"m2","price":15},{"name":"Malowanie artystyczne","unit":"m2","price":312},{"name":"Malowanie balustrad lub poręczy balkonowych","unit":"m2","price":75},{"name":"Malowanie drzwi","unit":"m2","price":118},{"name":"Malowanie fantazyjne","unit":"m2","price":20},{"name":"Malowanie na biało grzejników","unit":"Żebro","price":10},{"name":"Malowanie okien","unit":"m2","price":212},{"name":"Malowanie podkładowe (wraz z zaprawkami )","unit":"m2","price":10},{"name":"Malowanie rur wod - kan, lub c.o.","unit":"m2","price":15},{"name":"Malowanie sufitu dwukrotne (farba-biała)","unit":"m2","price":15},{"name":"Malowanie sufitu dwukrotne (farba-kolor)","unit":"m2","price":15},{"name":"Malowanie sufitu jednokrotne (farba-biała)","unit":"m2","price":14},{"name":"Malowanie sufitu jednokrotne (farba-kolor)","unit":"m2","price":12},{"name":"Malowanie ścian dwukrotne (farba-biała)","unit":"m2","price":25},{"name":"Malowanie ścian dwukrotne (farba-kolor)","unit":"m2","price":25},{"name":"Malowanie ścian jednokrotne (farba-biała)","unit":"m2","price":12},{"name":"Malowanie ścian jednokrotne (farba-kolor)","unit":"m2","price":14},{"name":"Opalanie starej powłoki malarskiej na powierzchniach drewnianych","unit":"m2","price":37},{"name":"Skrobanie i mycie ścian z farby klejowej (pod malowanie)","unit":"m2","price":15},{"name":"Skrobanie starych powłok malarskich","unit":"m2","price":12},{"name":"Gruntowanie  grunt wodny","unit":"m2","price":3},{"name":"Demontaż grzejnika na czas malowania (z późniejszym montażem)","unit":"szt.","price":100},{"name":"Usuwanie tapet","unit":"m2","price":10}],"Glazurnictwo":[{"name":"Demontaż kabiny prysznicowej z brodzikiem","unit":"szt.","price":200},{"name":"Demontaż wanny","unit":"szt.","price":200},{"name":"Fugowanie","unit":"m2","price":10},{"name":"fugowanie","unit":"m2","price":40},{"name":"Gruntowanie","unit":"m2","price":5},{"name":"Montaż baterii prysznicowej  podtynkowej","unit":"szt.","price":500},{"name":"Montaż baterii prysznicowej  podtynkowej (podwójnej )","unit":"szt.","price":700},{"name":"Montaż baterii umywalkowej podtynkowej","unit":"szt.","price":300},{"name":"Montaż cokołów ciętych","unit":"m2","price":50},{"name":"Montaż cokołów gotowych","unit":"m2","price":29},{"name":"Montaż drzwiczek rewizyjnych","unit":"szt.","price":77},{"name":"Montaż drzwiczek rewizyjnych","unit":"szt.","price":77},{"name":"Montaż drzwiczek rewizyjnych","unit":"szt.","price":77},{"name":"Montaż i demontaż grzejnika","unit":"szt.","price":200},{"name":"Montaż kabiny prysznicowej","unit":"szt.","price":500},{"name":"Montaż Odpływ liniowy","unit":"szt.","price":500},{"name":"Montaż półki wnękowej gotowej","unit":"szt.","price":250},{"name":"Montaż schodów z konglomeratu","unit":"m2","price":350},{"name":"Montaż wanny","unit":"szt.","price":250},{"name":"Montażu drzwi składanych (łamanych)","unit":"szt.","price":500},{"name":"Montażu lustra wraz z podłączeniem do prądu","unit":"szt.","price":200},{"name":"Montażu miski WC","unit":"szt.","price":200},{"name":"Montażu stelaża WC z podłączeniem wody i kanalizacji","unit":"szt.","price":500},{"name":"Montażu umywalki z szafką wiszącą","unit":"szt.","price":300},{"name":"Obudowa stelażu podtynkowego","unit":"szt.","price":500},{"name":"Obudowa wanny","unit":"szt.","price":500},{"name":"Półka wnękowa","unit":"m2","price":100},{"name":"Przeróbki elektryczne","unit":"szt.","price":50},{"name":"Przeróbki hydrauliczne","unit":"szt.","price":100},{"name":"Przyklejenie cokołu na stopniach","unit":"mb.","price":60},{"name":"Remont Łazienki + (biały montaż ,wieszanie akcesorji ,oświetlenia )","unit":"szt.","price":7500},{"name":"Remont Łazienki + (biały montaż ,wieszanie akcesorji ,oświetlenia )","unit":"szt.","price":7500},{"name":"Remont WC","unit":"szt.","price":3500},{"name":"Skucie starej glazury","unit":"m2","price":35},{"name":"Szlifowanie 45 st.","unit":"mb.","price":50},{"name":"Ścianka prysznicowa Walk-in","unit":"m2","price":200},{"name":"Układanie dekorów","unit":"mb.","price":40},{"name":"Układanie dekorów wzór","unit":"m2","price":200},{"name":"Układanie glazury (60x60)","unit":"m2","price":100},{"name":"Układanie glazury ściany (120 x 40)","unit":"m2","price":150},{"name":"Układanie gresu podłoga","unit":"m2","price":120},{"name":"Układanie gresu podłoga 120x20","unit":"m2","price":120},{"name":"Układanie mozaiki","unit":"m2","price":232},{"name":"Układanie płytek","unit":"m2","price":184},{"name":"Układanie płytek klinkierowych","unit":"m2","price":108},{"name":"Układanie płytek na schodach","unit":"m2","price":150},{"name":"Układanie silikonu","unit":"mb.","price":10},{"name":"Układanie terakoty","unit":"m2","price":100},{"name":"Układnie płytek na schodach + szlif 45","unit":"mb.","price":200},{"name":"Wiercenie otworów w glazurze","unit":"szt.","price":30},{"name":"Wiercenie otworów w gresie","unit":"szt.","price":50},{"name":"Wiercenie otworów w płytkach grosowych","unit":"szt.","price":50},{"name":"Wykonanie hydroizolacji","unit":"m2","price":30},{"name":"Wykonanie pasa płytek między meblami kuchennymi","unit":"m2","price":500},{"name":"Wykonanie półki, wnęk i nietypowych powierzchni z glazury","unit":"szt.","price":434},{"name":"Wylanie wylewki samopoziomującej","unit":"m2","price":60},{"name":"Wyrównanie ścian i posadzki pod nowe płytki","unit":"m2","price":44},{"name":"Wyszlifowanie krawędzi płytek na narożnikach","unit":"m2","price":147},{"name":"xcx","unit":"mb","price":300},{"name":"xxx","unit":"mb.","price":333},{"name":"Zabudowa  stelażu podtynkowego","unit":"szt.","price":500},{"name":"Zabudowa  stelażu podtynkowego (płytą OSB)","unit":"szt.","price":200},{"name":"Zabudowa wanny","unit":"szt.","price":500},{"name":"Zamocowanie narożnych listew","unit":"m2","price":54},{"name":"Zmiana wielkości otworu drzwiowego","unit":"szt.","price":200},{"name":"Wykonanie pasa płytek w kuchni","unit":"szt.","price":500},{"name":"Montażu parapetu z płytek. (3mb)","unit":"mb.","price":300},{"name":"Łazienka parter","unit":"szt.","price":7000},{"name":"Łazienka poddasze","unit":"szt.","price":12000},{"name":"Schody","unit":"szt.","price":3000}],"Karton_gips":[{"name":"Docieplanie poddasza (wełna mineralna i folia) + płyta gipsowo-kartonowa na stelażu","unit":"m2","price":188},{"name":"Montaż narożników aluminiowych","unit":"m2","price":13},{"name":"Montaż płyt gips-karton na klej","unit":"m2","price":50},{"name":"Montaż płyt gips-karton na stelażu","unit":"m2","price":119},{"name":"Montaż sztukaterii","unit":"m2","price":44},{"name":"Szpachlowanie łączeń między płytami gipsowo-kartonowymi","unit":"m2","price":24},{"name":"Szpachlowanie siatki zbrojącej na pęknięciach i zarysowaniach","unit":"m2","price":32},{"name":"Wykonanie otworu na drzwi w ściance z płyt gips-karton","unit":"szt.","price":120},{"name":"Wykonanie wnęki na oświetlenie","unit":"m2","price":100},{"name":"Zabudowy nietypowe z kształtowników metalowych i płyt, miejscowe obniżenia sufitów, półki o zarysach elementami łukowymi","unit":"m2","price":100},{"name":"Zmiana kierunku ściany z płyty gips-karton","unit":"szt.","price":62},{"name":"Aplikacja microcemetu","unit":"m2","price":60},{"name":"Szpachlowanie ścian 2 warstwy","unit":"m2","price":35},{"name":"Montaż podwieszanego sufitu z ociepleniem wełną mineralną","unit":"m2","price":150}],"Montaż_drzwi":[{"name":"Drzwi przesuwne (naścienne)","unit":"szt.","price":400},{"name":"Montaż drzwi antywłamaniowych","unit":"szt","price":585},{"name":"Montaż drzwi rewizyjnych","unit":"szt","price":52},{"name":"Montaż drzwi wewnętrznych + (montaż szyldów)","unit":"szt","price":300},{"name":"Montaż drzwi zewnętrznych (gotowy otwór)","unit":"szt","price":325},{"name":"Montaż drzwi zewnętrznych z wycięciem starej ościeżnicy","unit":"szt","price":500},{"name":"Montaż szyldów","unit":"szt","price":30},{"name":"Obróbka otworów drzwiowych","unit":"mb","price":58},{"name":"Podcinanie drzwi","unit":"szt","price":26},{"name":"Rozbiórka starych otworów drzwiowych","unit":"m2","price":71},{"name":"Wykonanie otworu na drzwi w ściance z płyt gips-karton","unit":"m2","price":89},{"name":"Wykucie otworu drzwiowego w ściance działowej","unit":"szt","price":78},{"name":"Demontaż metalowej ościeżnicy + poszerzenie/korekta otworów drzwiowych","unit":"szt.","price":100},{"name":"Wymiana drzwi wejściowych + (demontaż)+(powiekszanie otworu żelbeton)","unit":"szt","price":1000},{"name":"Poszerzenie/korekta otworów drzwiowych","unit":"szt.","price":50}],"Usługi_stolarskie":[{"name":"Położenie wykładziny dywanowej","unit":"m2","price":40},{"name":"Układanie parkietu","unit":"m2","price":50},{"name":"Położenie wykładziny PCV","unit":"m2","price":55},{"name":"Montaż paneli podłogowych","unit":"m2","price":30},{"name":"Montaż listew przypodłogowych  PCV klejonych","unit":"mb","price":20},{"name":"Montaż listew przypodłogowych MDV","unit":"mb","price":20},{"name":"Montaż paneli ściennych","unit":"m2","price":87},{"name":"Montaż podłogi deska (Finish Parkiet)","unit":"m2","price":79},{"name":"Układanie mozaiki","unit":"m2","price":65},{"name":"Montaż deski Berlineckiej","unit":"m2","price":50},{"name":"Montaż progów","unit":"szt","price":72},{"name":"Zrywanie starych wykładzin","unit":"m2","price":29},{"name":"Zrywanie parkietu starego","unit":"m2","price":50},{"name":"Montaż cokołów","unit":"m2","price":65},{"name":"Montaż listew wykończeniowych","unit":"m2","price":21},{"name":"Podcinanie drzwi","unit":"szt","price":21},{"name":"Bejcowanie","unit":"m2","price":14},{"name":"Wykonanie rusztu z listew i montaż boazerii z drewna","unit":"m2","price":58},{"name":"Szlifowanie i lakierowanie boazerii","unit":"m2","price":14},{"name":"Układnie paneli winylowych","unit":"m2","price":50}],"Podwieszane_sufity":[{"name":"Gzyms po łuku","unit":"m2","price":312},{"name":"Gzyms prosty","unit":"m2","price":187},{"name":"Montaż halogenów nawierzchniowych","unit":"m2","price":74},{"name":"Montaż halogenów wpuszczanych","unit":"m2","price":74},{"name":"Montaż lampy rastrowej - w suficie kasetonowym","unit":"m2","price":74},{"name":"Montaż taśmy LED - jednokolorowa","unit":"m2","price":32},{"name":"Montaż taśmy LED - RGB (wielokolorowa)","unit":"m2","price":44},{"name":"Podcięcie zabudowy przy suficie","unit":"m2","price":99},{"name":"Sufit podwieszany dwupoziomowy","unit":"m2","price":150},{"name":"Sufit podwieszany jednopoziomowy","unit":"m2","price":100},{"name":"Sufit podwieszany jednopoziomowy (aneks kuchenny)","unit":"m2","price":120},{"name":"Sufit podwieszany jednopoziomowy","unit":"m2","price":100},{"name":"Sufit podwieszany kasetonowy","unit":"m2","price":94},{"name":"Wpust liniowy na oświetlenie","unit":"m2","price":174},{"name":"Wpust na karnisz","unit":"mb","price":149},{"name":"Wpust punktowy na oświetlenie","unit":"szt.","price":87},{"name":"Wykończenie sufitu","unit":"m2","price":112},{"name":"Wykończenie sufitu po łuku","unit":"m2","price":274},{"name":"Wykonania zabudowy pionów grzewczych z płyt gipsowo-kartonowych","unit":"szt.","price":150}],"Montaż_okien":[{"name":"Demontaż okien","unit":"mb.","price":130},{"name":"Demontaż ościeżnic okiennych","unit":"szt.","price":156},{"name":"Montaż okien balkonowych","unit":"mb.","price":130},{"name":"Montaż okien dachowych","unit":"mb.","price":585},{"name":"Montaż okien drewnianych","unit":"mb.","price":130},{"name":"Montaż okien plastikowych","unit":"mb.","price":130},{"name":"Montaż okien wewnętrznych","unit":"mb.","price":130},{"name":"Montaż okien zespolonych","unit":"mb.","price":130},{"name":"Montaż ościeżnic okiennych","unit":"szt.","price":156},{"name":"Montaż parapetu","unit":"mb.","price":70},{"name":"Montaż świetlików","unit":"mb.","price":585},{"name":"Obróbka otworów okiennych","unit":"mb.","price":78},{"name":"Wymiana klamek i szyldów okiennych","unit":"szt.","price":52}],"Murowanie_tynkowanie":[{"name":"Skuwanie tynku","unit":"m2","price":82},{"name":"Uzupełnienie pasów tynków po wyburzonych ścianach i otworach","unit":"m2","price":57},{"name":"Tynkowanie maszynowe tynk z agregatu","unit":"m2","price":36},{"name":"Tynki akrylowe mineralne","unit":"m2","price":106},{"name":"Tynki kwarcowe „kamyczki”","unit":"m2","price":106},{"name":"Murowanie z cegły","unit":"m2","price":179},{"name":"Wykonanie schodów murowanych betonowych","unit":"m2","price":849},{"name":"Wylewki samopoziomujące","unit":"m2","price":73},{"name":"Wylewki trudne podłoża","unit":"m2","price":93},{"name":"Gładź gipsowa nakładana wałkiem","unit":"m2","price":35},{"name":"Warstwa wyrównująca pod gładzie (przy bardzo nierównych tynkach)","unit":"m2","price":20},{"name":"Wyrównywanie krzywych naroży przed gładzią","unit":"m2","price":62},{"name":"Obsadzanie narożników aluminiowych","unit":"mb.","price":15},{"name":"Obróbka otworów okiennych","unit":"m2","price":82},{"name":"Tynki ozdobne","unit":"m2","price":80},{"name":"Montaż parapetów wewnętrznych","unit":"szt.","price":318},{"name":"Docieplanie ścian wewnątrz","unit":"m2","price":158},{"name":"Wyburzanie ścian z cegły","unit":"m2","price":253},{"name":"Wyrównanie ścian tynkiem gipsowym","unit":"m2","price":30},{"name":"Naprawa rys i pęknięć","unit":"m2","price":30},{"name":"Montaż kasetonów","unit":"m2","price":126},{"name":"Dwustronne obrobienie glifów przy drzwiach","unit":"m2","price":106},{"name":"Wymurowanie stopnia","unit":"m2","price":101},{"name":"Tynkowanie ręczne ścian","unit":"m2","price":67},{"name":"Tynkowanie ręczne sufitów","unit":"m2","price":168},{"name":"Szlifowanie gładzi","unit":"m2","price":10},{"name":"Murowanie z betonu komórkowego","unit":"m2","price":50},{"name":"Montaż tragarzu w nadprożu","unit":"mb.","price":200},{"name":"Wylewanie  posadzki betonowej","unit":"m2","price":70},{"name":"Tynk dekoracyjny (efekt betonu z pacy)","unit":"mb.","price":70}],"Inne":[{"name":"Stawka dzienna","unit":"d","price":400},{"name":"Demontaż starej instalacji centralnego ogrzewania","unit":"szt","price":1000},{"name":"Wylewka wyrównawcza pod płytki (opcjonalnie)","unit":"m2","price":20},{"name":"Przeróbki punktów elktrycznych","unit":"szt","price":30},{"name":"Przeróbki punktów  hydraulicznych","unit":"szt","price":50},{"name":"Wykonanie nowej instalacji wodno  hydraulicznej","unit":"szt.","price":2000},{"name":"Demontaż i ponowny montaż grzejnika (Ciężkie grzejniki żeliwne)","unit":"szt","price":150},{"name":"Biały montaż elektryczny (gniazdka, włącznika)","unit":"szt.","price":10},{"name":"Szlifowanie zgrubne / wyrównawcze","unit":"m2.","price":12},{"name":"Przywóz materiałów  + wniesienie","unit":"szt","price":500},{"name":"Zniesienie i wywoz gruzu","unit":"m3","price":250},{"name":"Podłączenie zmywarki, zlewozmywaka, baterii oraz kuchenki gazowej","unit":"szt.","price":300},{"name":"Zalanie  otworu po starej klatce schodowej","unit":"szt.","price":1500},{"name":"Montaż 4 belek nadprożowych typu L 2 szt. o długości 360 cm oraz 2 szt. o długości 300 cm(salon )","unit":"szt.","price":2000},{"name":"Wyburzanie ścian nośnych (salon)","unit":"szt.","price":1000},{"name":"Wyburzanie ścian nośnych (pietro)","unit":"szt","price":1000},{"name":"Zamurowanie wnęki balkonowej (360 x 220 cm) i montaż nadproża   L-120x200","unit":"szt","price":1500},{"name":"Montaż wyłazu na strych o wymiarach 100 × 70 cm wraz z wycięciem otworu w stropie żelbetowym","unit":"szt","price":1000},{"name":"Uzupełnienie otworu po klatce schodowej w konstrukcji drewnianej (strych)","unit":"szt","price":1000},{"name":"Zamurowanie okien","unit":"szt","price":100},{"name":"Wyburzenie werandy","unit":"szt","price":2000},{"name":"Schody wejsciowe","unit":"szt","price":2500},{"name":"Podmurowania schodów (skosu) pustakiem","unit":"szt","price":500},{"name":"Montaż daszku nad schodami","unit":"szt","price":800}],"brukarstwo":[{"name":"Układanie kostki","unit":"m2","price":100}],"Prace_rozbiurkowe":[{"name":"Usuwanie  boazerii","unit":"m2","price":20},{"name":"Demontaż ościeżnicy zalanej betonem","unit":"szt.","price":200},{"name":"Demontaż ościeżnicy zewnętrznej lub wewnętrznej","unit":"szt.","price":100},{"name":"Usuwanie (zrywanie) wykładziny","unit":"m2","price":15},{"name":"Skuwanie starych płytek","unit":"m2","price":50}],"Dodatkowe":[{"name":"Malowanie dwukrotne salon","unit":"m2","price":15},{"name":"Malowanie dwukrotne sypialnia","unit":"m2","price":15},{"name":"Malowanie dwukrotne kuchnia","unit":"m2","price":15},{"name":"Malowanie dwukrotne pokój 1","unit":"m2","price":15},{"name":"Malowanie dwukrotne pokój 2","unit":"m2","price":15},{"name":"Malowanie płytek łazienka","unit":"m2","price":30},{"name":"Mlaowanie dwukrotne łazienka","unit":"m2","price":15}],"Elektryka":[{"name":"Awaryjne usuwanie usterki (pierwsza godz.)","unit":"godz.","price":180},{"name":"Demontaż starej instalacji","unit":"mb","price":3},{"name":"Doradztwo techniczne/wizja lokalna","unit":"usługa","price":100},{"name":"Instalacja punktu oświetleniowego LED","unit":"szt.","price":60},{"name":"Montaż czujki alarmowej","unit":"szt.","price":70},{"name":"Montaż czujnika ruchu/zmierzchu","unit":"szt.","price":50},{"name":"Montaż dzwonka elektrycznego","unit":"szt.","price":50},{"name":"Montaż gniazda antenowego/komputerowego","unit":"szt.","price":35},{"name":"Montaż gniazda hermetycznego (zewn.)","unit":"szt.","price":50},{"name":"Montaż gniazda jednofazowego (230V)","unit":"szt.","price":30},{"name":"Montaż gniazda trójfazowego (siła)","unit":"szt.","price":55},{"name":"Montaż instalacji odgromowej","unit":"mb","price":40},{"name":"Montaż kamery monitoringu (CCTV)","unit":"szt.","price":180},{"name":"Montaż oprawy oświetleniowej (halogen)","unit":"szt.","price":45},{"name":"Montaż oświetlenia ogrodowego","unit":"szt.","price":100},{"name":"Montaż przycisku dzwonka","unit":"szt.","price":30},{"name":"Montaż rozdzielnicy (do 12 modułów)","unit":"szt.","price":300},{"name":"Montaż rozdzielnicy (powyżej 24 mod.)","unit":"szt.","price":600},{"name":"Montaż różnicowoprądowego (RCD)","unit":"szt.","price":60},{"name":"Montaż skrzynki licznikowej","unit":"szt.","price":200},{"name":"Montaż ściemniacza oświetlenia","unit":"szt.","price":35},{"name":"Montaż taśmy LED z zasilaczem","unit":"mb","price":50},{"name":"Montaż wentylatora łazienkowego","unit":"szt.","price":80},{"name":"Montaż wideodomofonu","unit":"szt.","price":250},{"name":"Montaż włącznika oświetlenia","unit":"szt.","price":25},{"name":"Montaż włącznika schodowego/krzyżowego","unit":"szt.","price":40},{"name":"Montaż zabezpieczenia nadprądowego (S)","unit":"szt.","price":25},{"name":"Osadzenie puszki instalacyjnej (beton)","unit":"szt.","price":30},{"name":"Osadzenie puszki instalacyjnej (cegła)","unit":"szt.","price":20},{"name":"Podłączenie domofonu","unit":"szt.","price":150},{"name":"Podłączenie oświetlenia (żyrandole, halogeny,lampy,plafony )","unit":"szt.","price":50},{"name":"Podłączenie płyty indukcyjnej/kuchenki","unit":"szt.","price":120},{"name":"Podłączenie silnika elektrycznego","unit":"szt.","price":150},{"name":"Podłączenie transformatora oświetlenia","unit":"szt.","price":40},{"name":"Pomiar rezystancji izolacji (obwód)","unit":"szt.","price":15},{"name":"Pomiar różnicowoprądowy (RCD)","unit":"szt.","price":30},{"name":"Pomiar skuteczności zerowania (punkt)","unit":"szt.","price":10},{"name":"Prace elektryczne - godzina pracy","unit":"godz.","price":140},{"name":"Przeniesienie punktu elektrycznego","unit":"szt.","price":150},{"name":"Punkt elektryczny (płytki - bez mat.)","unit":"szt.","price":70},{"name":"Punkt elektryczny (z kuciem - bez mat.)","unit":"szt.","price":180},{"name":"Sprawdzenie instalacji (przegląd 5-letni)","unit":"lokal","price":600},{"name":"Układanie kabla (w rurce/cegle)","unit":"mb","price":4},{"name":"Układanie kabla w betonie","unit":"mb","price":7},{"name":"Układanie peszla/rury w bruździe","unit":"mb","price":5},{"name":"Wprowadzenie kabla do rozdzielnicy","unit":"szt.","price":15},{"name":"Wykonanie bruzd w betonie","unit":"mb","price":35},{"name":"Wykonanie bruzd w cegle","unit":"mb","price":15},{"name":"Wykonanie uziemienia","unit":"kpl.","price":450},{"name":"Wymiana gniazda/włącznika","unit":"szt.","price":40},{"name":"Przedłużenie przewodu","unit":"szt.","price":30},{"name":"Przeróbki elektryczne","unit":"szt.","price":1000}],"OGÓLNOBUDOWLANE":[{"name":"Przedłużenie trasu betonowego","unit":"m2.","price":300},{"name":"Murowanie z gazobetonu ściany nośne (24 cm)","unit":"m2.","price":160},{"name":"Murowanie z gazobetonu ściany działowe (12 cm)","unit":"m2.","price":90},{"name":"Wykonanie podciągu żelbetowego (robocizna + szalowanie + zbrojenie + betonowanie)","unit":"mb.","price":400},{"name":"Montaż nadproży/podciągów prefabrykowanych","unit":"mb.","price":250},{"name":"Wylanie schodów żelbetowych (proste):","unit":"szt.","price":250}],"PODŁOGI":[{"name":"Układanie paneli","unit":"m2","price":60},{"name":"Montaż listew przypodłogowych z PCV","unit":"mb","price":15}]};
+const $=id=>document.getElementById(id);let chosen=null,lines=[];
+const BASE_CATALOG=JSON.parse(JSON.stringify(CATALOG));
+const DEFAULT_SUB='Ogólne';
+let SUBCATS={};
+function loadCustomCatalog(){
+ try{
+  SUBCATS=JSON.parse(localStorage.getItem('budwel_subcategories')||'{}');
+  const full=localStorage.getItem('budwel_catalog_full');
+  if(full){const saved=JSON.parse(full);Object.keys(CATALOG).forEach(k=>delete CATALOG[k]);Object.entries(saved).forEach(([cat,items])=>{CATALOG[cat]=Array.isArray(items)?items:[];});}
+  else {const saved=JSON.parse(localStorage.getItem('budwel_custom_catalog')||'{}');Object.entries(saved).forEach(([cat,items])=>{if(!CATALOG[cat])CATALOG[cat]=[];if(Array.isArray(items))CATALOG[cat].push(...items);});}
+ }catch(e){console.warn('Nie udało się odczytać cennika',e);}
+ Object.entries(CATALOG).forEach(([cat,items])=>items.forEach(x=>{if(!x.subcategory)x.subcategory=DEFAULT_SUB;}));
+}
+function saveCustomCatalog(){
+ localStorage.setItem('budwel_catalog_full',JSON.stringify(CATALOG));
+ localStorage.setItem('budwel_subcategories',JSON.stringify(SUBCATS));
+}
+function refreshCategories(selectName){
+ const old=selectName||$('category').value;const names=Object.keys(CATALOG);
+ $('category').innerHTML=names.map(k=>`<option value="${esc(k)}">${esc(k.replaceAll('_',' '))}</option>`).join('');
+ if(names.includes(old))$('category').value=old;
+ refreshSubcategories();
+}
+function refreshSubcategories(selectName){
+ const cat=$('category').value, old=selectName||$('subcategory').value;
+ const names=[...new Set([...(SUBCATS[cat]||[]),...((CATALOG[cat]||[]).map(x=>x.subcategory||DEFAULT_SUB))])];
+ if(!names.length)names.push(DEFAULT_SUB);
+ $('subcategory').innerHTML='<option value="">Wszystkie podkategorie</option>'+names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+ if(names.includes(old))$('subcategory').value=old;
+}
+const money=n=>(Number(n)||0).toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł';
+function init(){loadCustomCatalog();loadContractors();refreshCategories();$('date').value=new Date().toISOString().slice(0,10);renderResults();renderLines();renderCatalogTree();refreshSettingsCatalogSelectors();}
+$('category').onchange=()=>{refreshSubcategories();renderResults();};
+$('subcategory').onchange=()=>renderResults();
+$('createCategory').onclick=()=>{
+ const name=$('newCategory').value.trim();
+ if(!name){alert('Wpisz nazwę nowej kategorii.');return;}
+ if(Object.keys(CATALOG).some(x=>x.toLowerCase()===name.toLowerCase())){alert('Taka kategoria już istnieje — wybierz ją z listy.');return;}
+ CATALOG[name]=[];SUBCATS[name]=[];saveCustomCatalog();refreshCategories(name);$('newCategory').value='';renderResults();renderCatalogTree();refreshSettingsCatalogSelectors();$('settingsCategorySelect').value=name;refreshSettingsCatalogSelectors();$('status').textContent='Dodano kategorię: '+name;
+};
+$('createSubcategory').onclick=()=>{
+ const cat=$('settingsCategorySelect')?.value||$('category').value,name=$('newSubcategory').value.trim();
+ if(!cat){alert('Najpierw wybierz kategorię.');return;}
+ if(!name){alert('Wpisz nazwę podkategorii.');return;}
+ SUBCATS[cat]=SUBCATS[cat]||[];
+ if(SUBCATS[cat].some(x=>x.toLowerCase()===name.toLowerCase()) || (CATALOG[cat]||[]).some(x=>(x.subcategory||DEFAULT_SUB).toLowerCase()===name.toLowerCase())){alert('Taka podkategoria już istnieje.');return;}
+ SUBCATS[cat].push(name);saveCustomCatalog();refreshSubcategories(name);$('newSubcategory').value='';renderResults();renderCatalogTree();refreshSettingsCatalogSelectors();$('settingsCategorySelect').value=cat;refreshSettingsCatalogSelectors();$('settingsSubcategorySelect').value=name;$('status').textContent='Dodano podkategorię „'+name+'” w kategorii '+cat+'.';
+};
+$('createService').onclick=()=>{
+ const category=$('settingsCategorySelect')?.value||$('category').value,subcategory=$('settingsSubcategorySelect')?.value||$('subcategory').value||DEFAULT_SUB,name=$('newService').value.trim(),unit=$('newUnit').value.trim(),price=Number($('newPrice').value);
+ if(!category||!name||!unit||$('newPrice').value===''||!Number.isFinite(price)||price<0){alert('Uzupełnij nazwę usługi, jednostkę i prawidłową cenę.');return;}
+ if((CATALOG[category]||[]).some(x=>x.name.toLowerCase()===name.toLowerCase()&&(x.subcategory||DEFAULT_SUB)===subcategory)){alert('Taka usługa już istnieje w tej podkategorii.');return;}
+ CATALOG[category].push({name,unit,price,subcategory});saveCustomCatalog();$('newService').value='';$('newUnit').value='';$('newPrice').value='';$('search').value='';renderResults();renderCatalogTree();refreshSettingsCatalogSelectors();$('settingsCategorySelect').value=category;refreshSettingsCatalogSelectors();$('settingsSubcategorySelect').value=subcategory;$('status').textContent='Dodano usługę do '+category+' → '+subcategory+'.';
+};
+
+
+let contractors=[];
+let editingContractorId=null;
+function loadContractors(){
+ try{contractors=JSON.parse(localStorage.getItem('budwel_contractors')||'[]');if(!Array.isArray(contractors))contractors=[];}catch(e){contractors=[];}
+ refreshContractorSelect();renderContractorList();
+}
+function saveContractors(){localStorage.setItem('budwel_contractors',JSON.stringify(contractors));refreshContractorSelect();renderContractorList();}
+function refreshContractorSelect(){
+ const sel=$('contractorSelect');if(!sel)return;
+ const selected=sel.value;
+ sel.innerHTML='<option value="">— wybierz kontrahenta lub wpisz dane ręcznie —</option>'+contractors.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+ if(contractors.some(c=>c.id===selected))sel.value=selected;
+}
+function renderContractorList(){
+ const root=$('contractorList');if(!root)return;
+ root.innerHTML=contractors.length?contractors.map(c=>`<div class="contractor-row"><div><b>${esc(c.name)}</b><small>${esc(c.phone||'Brak telefonu')} · ${esc(c.email||'Brak e-maila')}<br>${esc(c.address||'Brak adresu')}<br>Odległość: ${Number(c.distance)||0} km</small></div><div class="contractor-actions"><button class="secondary" type="button" data-edit-con="${esc(c.id)}">Edytuj</button><button class="danger" type="button" data-del-con="${esc(c.id)}">Usuń</button></div></div>`).join(''):'<p class="muted">Baza kontrahentów jest pusta.</p>';
+ root.querySelectorAll('[data-edit-con]').forEach(btn=>btn.onclick=()=>{const c=contractors.find(x=>x.id===btn.dataset.editCon);if(!c)return;editingContractorId=c.id;$('conName').value=c.name;$('conPhone').value=c.phone||'';$('conEmail').value=c.email||'';$('conAddress').value=c.address||'';$('conDistance').value=c.distance??'';$('saveContractor').textContent='Zapisz zmiany';});
+ root.querySelectorAll('[data-del-con]').forEach(btn=>btn.onclick=()=>{if(!confirm('Usunąć tego kontrahenta z bazy?'))return;contractors=contractors.filter(x=>x.id!==btn.dataset.delCon);saveContractors();if($('contractorSelect').value===btn.dataset.delCon)$('contractorSelect').value='';});
+}
+function clearContractorForm(){editingContractorId=null;['conName','conPhone','conEmail','conAddress','conDistance'].forEach(id=>$(id).value='');$('saveContractor').textContent='+ Zapisz kontrahenta';}
+$('saveContractor').onclick=()=>{
+ const name=$('conName').value.trim();if(!name){alert('Wpisz nazwę lub imię i nazwisko kontrahenta.');return;}
+ const item={id:editingContractorId||('con-'+Date.now()),name,phone:$('conPhone').value.trim(),email:$('conEmail').value.trim(),address:$('conAddress').value.trim(),distance:Number($('conDistance').value)||0};
+ const index=contractors.findIndex(c=>c.id===item.id);if(index>=0)contractors[index]=item;else contractors.push(item);
+ saveContractors();clearContractorForm();$('status').textContent='Kontrahent zapisany w bazie.';
+};
+$('clearContractorForm').onclick=clearContractorForm;
+$('contractorSelect').onchange=()=>{
+ const c=contractors.find(x=>x.id===$('contractorSelect').value);if(!c)return;
+ $('client').value=c.name;$('clientPhone').value=c.phone||'';$('clientEmail').value=c.email||'';$('clientAddress').value=c.address||'';$('jobDistance').value=Number(c.distance)||0;calcCosts();
+};
+
+function renderCatalogTree(){
+ const root=$('catalogTree'); if(!root)return;
+ const select=$('catalogCategorySelect');
+ const categories=Object.keys(CATALOG).sort((a,b)=>a.localeCompare(b,'pl'));
+ if(select){const previous=select.value;select.innerHTML=categories.map(c=>`<option value="${esc(c)}">${esc(c.replaceAll('_',' '))}</option>`).join('');if(categories.includes(previous))select.value=previous;}
+ const cat=select?.value||categories[0];
+ if(!cat){root.innerHTML='<p class="muted">Brak kategorii w cenniku.</p>';return;}
+ const items=CATALOG[cat]||[];
+ const subs=[...new Set([...(SUBCATS[cat]||[]),...items.map(x=>x.subcategory||DEFAULT_SUB)])].sort((a,b)=>a.localeCompare(b,'pl'));
+ root.innerHTML=`<details class="tree-category" open><summary>▣ ${esc(cat.replaceAll('_',' '))}<small>${items.length} usług</small></summary>
+ ${subs.map(sub=>{const rows=items.map((x,index)=>({x,index})).filter(o=>(o.x.subcategory||DEFAULT_SUB)===sub);
+ return `<details class="tree-subcategory" open><summary>↳ ${esc(sub)}<small>${rows.length} usług</small></summary>
+ <div class="catalog-price-list">${rows.map(({x,index})=>`<div class="catalog-price-row"><div><b>${esc(x.name)}</b><small>${esc(x.unit)}</small></div><label class="price-edit"><span>Cena zł</span><input type="number" min="0" step="0.01" value="${Number(x.price)||0}" data-price-index="${index}" aria-label="Cena ${esc(x.name)}"></label></div>`).join('')||'<div class="tree-empty">Brak usług</div>'}</div></details>`;
+ }).join('')}</details>`;
+ root.querySelectorAll('[data-price-index]').forEach(input=>input.addEventListener('change',()=>{
+  const i=Number(input.dataset.priceIndex),value=Number(input.value);
+  if(!Number.isFinite(value)||value<0){alert('Wpisz prawidłową cenę.');input.value=Number(CATALOG[cat][i]?.price)||0;return;}
+  CATALOG[cat][i].price=value;saveCustomCatalog();renderResults();$('status').textContent='Zapisano nową cenę usługi w bazie cennika.';
+ }));
+}
+$('catalogCategorySelect')?.addEventListener('change',renderCatalogTree);
+
+function refreshSettingsCatalogSelectors(){
+ const catSel=$('settingsCategorySelect'),subSel=$('settingsSubcategorySelect');if(!catSel||!subSel)return;
+ const categories=Object.keys(CATALOG).sort((a,b)=>a.localeCompare(b,'pl'));const current=catSel.value||$('category').value;
+ catSel.innerHTML=categories.map(c=>`<option value="${esc(c)}">${esc(c.replaceAll('_',' '))}</option>`).join('');
+ if(categories.includes(current))catSel.value=current;
+ const cat=catSel.value||categories[0];const subs=[...new Set([...(SUBCATS[cat]||[]),...(CATALOG[cat]||[]).map(x=>x.subcategory||DEFAULT_SUB)])].sort((a,b)=>a.localeCompare(b,'pl'));
+ const prev=subSel.value;subSel.innerHTML=subs.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(subs.includes(prev))subSel.value=prev;
+ $('category').value=cat;refreshSubcategories(subSel.value);$('subcategory').value=subSel.value;
+}
+$('settingsCategorySelect')?.addEventListener('change',()=>{refreshSettingsCatalogSelectors();$('category').value=$('settingsCategorySelect').value;renderResults();});
+$('settingsSubcategorySelect')?.addEventListener('change',()=>{$('category').value=$('settingsCategorySelect').value;$('subcategory').value=$('settingsSubcategorySelect').value;renderResults();});
+
+
+function switchTab(tab){
+ const settings=tab==='settings', costs=tab==='costs', calendar=tab==='calendar', quote=!settings&&!costs&&!calendar;
+ $('quoteView').hidden=!quote;
+ $('costsView').hidden=!costs;
+ $('settingsView').hidden=!settings;
+ $('calendarView').hidden=!calendar;
+ $('tabQuote').classList.toggle('active',quote);
+ $('tabCosts').classList.toggle('active',costs);
+ $('tabCalendar').classList.toggle('active',calendar);
+ $('tabSettings').classList.toggle('active',settings);
+ if(settings){renderCatalogTree();refreshCategories($('category').value);refreshSettingsCatalogSelectors();}
+ if(costs){renderFixedCosts();calcCosts();}
+ if(calendar){renderCalendar();renderAppointmentList();}
+}
+$('tabQuote').onclick=()=>switchTab('quote');
+$('tabCosts').onclick=()=>switchTab('costs');
+$('tabCalendar').onclick=()=>switchTab('calendar');
+$('tabSettings').onclick=()=>switchTab('settings');
+
+
+// Terminarz: osobna baza zleceń przechowywana lokalnie w przeglądarce.
+let appointments=[];let editingAppointmentId=null;let calendarCursor=new Date();calendarCursor.setDate(1);
+try{appointments=JSON.parse(localStorage.getItem('budwel_appointments')||'[]');if(!Array.isArray(appointments))appointments=[];}catch(e){appointments=[];}
+const apDate=(d)=>{const x=new Date(d+'T12:00:00');return Number.isNaN(x.getTime())?'':x.toLocaleDateString('pl-PL');};
+function saveAppointments(){localStorage.setItem('budwel_appointments',JSON.stringify(appointments));renderCalendar();renderAppointmentList();}
+function appointmentFormClear(){editingAppointmentId=null;['apTitle','apPlace','apStart','apEnd','apQuote','apNotes'].forEach(id=>$(id).value='');$('apStatus').value='Zaplanowane';$('appointmentFormTitle').textContent='Dodaj zlecenie do terminarza';$('saveAppointment').textContent='Zapisz zlecenie';$('appointmentStatus').textContent='';}
+function appointmentFormLoad(a){editingAppointmentId=a.id;$('apTitle').value=a.title||'';$('apPlace').value=a.place||'';$('apStart').value=a.start||'';$('apEnd').value=a.end||'';$('apStatus').value=a.status||'Zaplanowane';$('apQuote').value=a.quote||'';$('apNotes').value=a.notes||'';$('appointmentFormTitle').textContent='Edytuj zlecenie';$('saveAppointment').textContent='Zapisz zmiany';$('appointmentStatus').textContent='';$('calendarView').scrollIntoView({behavior:'smooth',block:'start'});}
+function renderCalendar(){
+ const host=$('calendarGrid');if(!host)return;
+ const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth();
+ $('calendarMonth').textContent=new Intl.DateTimeFormat('pl-PL',{month:'long',year:'numeric'}).format(calendarCursor);
+ const weekdays=['Pon','Wt','Śr','Czw','Pt','Sob','Niedz'];
+ let html=weekdays.map(x=>`<div class="calendar-weekday">${x}</div>`).join('');
+ const first=new Date(y,m,1),offset=(first.getDay()+6)%7,start=new Date(y,m,1-offset);
+ const today=new Date();today.setHours(0,0,0,0);
+ for(let i=0;i<42;i++){
+  const d=new Date(start);d.setDate(start.getDate()+i);const iso=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+  const ev=appointments.filter(a=>a.start&&a.end&&a.start<=iso&&a.end>=iso).sort((a,b)=>(a.title||'').localeCompare(b.title||'','pl'));
+  const cls=[d.getMonth()!==m?'outside':'',d.toDateString()===today.toDateString()?'today':''].filter(Boolean).join(' ');
+  html+=`<div class="calendar-day ${cls}"><div class="calendar-day-number">${d.getDate()}</div>${ev.slice(0,3).map(a=>`<button type="button" class="calendar-event ${a.status==='W trakcie'?'status-w-trakcie':a.status==='Zakończone'?'status-zakończone':''}" data-ap-edit="${esc(a.id)}" title="${esc(a.title)} · ${esc(a.status||'Zaplanowane')}">${esc(a.title||'Zlecenie')}</button>`).join('')}${ev.length>3?`<small>+${ev.length-3} więcej</small>`:''}</div>`;
+ }
+ host.innerHTML=html;
+ host.querySelectorAll('[data-ap-edit]').forEach(b=>b.onclick=()=>{const a=appointments.find(x=>x.id===b.dataset.apEdit);if(a)appointmentFormLoad(a);});
+}
+function renderAppointmentList(){const host=$('calendarList');if(!host)return;const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth();const list=appointments.filter(a=>{if(!a.start)return false;const d=new Date(a.start+'T12:00:00');return d.getFullYear()===y&&d.getMonth()===m;}).sort((a,b)=>a.start.localeCompare(b.start));
+ host.innerHTML=list.length?list.map(a=>`<div class="calendar-list-row"><div><b>${esc(a.title||'Zlecenie')}</b><small>${apDate(a.start)} – ${apDate(a.end)} · ${esc(a.place||'Brak adresu')}<br>Status: ${esc(a.status||'Zaplanowane')}${a.quote?' · Wycena: '+esc(a.quote):''}</small></div><div class="calendar-list-actions"><button type="button" class="secondary" data-ap-edit="${esc(a.id)}">Edytuj</button><button type="button" class="danger" data-ap-delete="${esc(a.id)}">Usuń</button></div></div>`).join(''):'<p class="muted">Brak zleceń w tym miesiącu.</p>';
+ host.querySelectorAll('[data-ap-edit]').forEach(b=>b.onclick=()=>{const a=appointments.find(x=>x.id===b.dataset.apEdit);if(a)appointmentFormLoad(a);});
+ host.querySelectorAll('[data-ap-delete]').forEach(b=>b.onclick=()=>{if(!confirm('Usunąć to zlecenie z terminarza?'))return;appointments=appointments.filter(x=>x.id!==b.dataset.apDelete);if(editingAppointmentId===b.dataset.apDelete)appointmentFormClear();saveAppointments();});
+}
+$('saveAppointment').onclick=()=>{const title=$('apTitle').value.trim(),start=$('apStart').value,end=$('apEnd').value;if(!title||!start||!end){alert('Wpisz nazwę zlecenia oraz datę rozpoczęcia i zakończenia.');return;}if(end<start){alert('Data zakończenia nie może być wcześniejsza niż data rozpoczęcia.');return;}const item={id:editingAppointmentId||('ap-'+Date.now()),title,place:$('apPlace').value.trim(),start,end,status:$('apStatus').value,quote:$('apQuote').value.trim(),notes:$('apNotes').value.trim()};const i=appointments.findIndex(x=>x.id===item.id);if(i>=0)appointments[i]=item;else appointments.push(item);calendarCursor=new Date(start+'T12:00:00');calendarCursor.setDate(1);saveAppointments();appointmentFormClear();$('appointmentStatus').textContent='Zlecenie zapisane w terminarzu.';};
+$('cancelAppointment').onclick=appointmentFormClear;
+$('newAppointment').onclick=()=>{appointmentFormClear();const d=new Date();const iso=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');$('apStart').value=iso;$('apEnd').value=iso;$('apTitle').focus();};
+$('calendarPrev').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()-1);renderCalendar();renderAppointmentList();};
+$('calendarNext').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()+1);renderCalendar();renderAppointmentList();};
+$('calendarToday').onclick=()=>{calendarCursor=new Date();calendarCursor.setDate(1);renderCalendar();renderAppointmentList();};
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderResults(){
+ let cat=$('category').value||Object.keys(CATALOG)[0],sub=$('subcategory').value,q=$('search').value.toLowerCase().trim();
+ let all=Object.entries(CATALOG).flatMap(([category,items])=>items.filter(x=>(!q||x.name.toLowerCase().includes(q))&&(!sub||category!==cat||(x.subcategory||DEFAULT_SUB)===sub)).map(x=>({...x,category})));
+ if(!q)all=(CATALOG[cat]||[]).filter(x=>!sub||(x.subcategory||DEFAULT_SUB)===sub).map(x=>({...x,category:cat}));
+ $('results').innerHTML=all.slice(0,150).map((x,i)=>`<div class="result" data-i="${i}"><div><b>${esc(x.name)}</b><small>${esc(x.category.replaceAll('_',' '))} → ${esc(x.subcategory||DEFAULT_SUB)} · ${esc(x.unit)}</small></div><strong>${money(x.price)}</strong></div>`).join('')||'<div class="result muted">Brak usług w tej podkategorii.</div>';
+ [...$('results').querySelectorAll('.result[data-i]')].forEach((el,i)=>el.onclick=()=>{$('results').querySelectorAll('.result.selected').forEach(row=>row.classList.remove('selected'));el.classList.add('selected');chosen=all[i];$('selected').textContent=`Wybrano: ${chosen.name} · ${chosen.unit} · ${money(chosen.price)}`;$('add').disabled=false;});
+}
+$('addManual').onclick=()=>{const name=$('manualName').value.trim(),unit=$('manualUnit').value.trim(),qty=Number($('manualQty').value),priceRaw=$('manualPrice').value,price=Number(priceRaw);if(!name||!unit||!Number.isFinite(qty)||qty<=0||priceRaw===''||!Number.isFinite(price)||price<0){alert('Uzupełnij nazwę, jednostkę, ilość i prawidłową cenę.');return;}lines.push({id:Date.now()+Math.random(),category:'Pozycje własne',name,unit,qty,price});$('manualName').value='';$('manualUnit').value='';$('manualQty').value='1';$('manualPrice').value='';renderLines();$('status').textContent='Dodano własną pozycję do wyceny.';};
+function addLine(){if(!chosen)return;let qty=Number($('qty').value);if(!(qty>0)){alert('Wpisz ilość większą od zera.');return;}lines.push({id:Date.now()+Math.random(),category:chosen.category,name:chosen.name,unit:chosen.unit,qty,price:Number(chosen.price)});renderLines();}
+function totals(){let sub=lines.reduce((s,x)=>s+x.qty*x.price,0),d=Math.min(100,Math.max(0,Number($('discount').value)||0)),dv=sub*d/100,total=sub-dv,adv=Math.max(0,Number($('advance').value)||0);$('subtotal').textContent=money(sub);$('discountValue').textContent=money(dv);$('total').textContent=money(total);$('advanceValue').textContent=money(adv);$('remaining').textContent=money(total-adv);$('printFooter').innerHTML=`<p><b>Klient:</b> ${esc($('client').value)} &nbsp; <b>Miejsce budowy:</b> ${esc($('place').value)}</p><p><b>Adres:</b> ${esc($('clientAddress').value)} &nbsp; <b>Telefon:</b> ${esc($('clientPhone').value)} &nbsp; <b>E-mail:</b> ${esc($('clientEmail').value)}</p><p><b>Numer:</b> ${esc($('number').value)} &nbsp; <b>Data:</b> ${esc($('date').value)}</p><p><b>Uwagi:</b> ${esc($('notes').value)}</p>`;$('total').dataset.value=String(total);
+ $('pNumber').textContent=$('number').value||'—';
+ $('pDate').textContent=$('date').value?new Date($('date').value+'T00:00:00').toLocaleDateString('pl-PL'):'—';
+ $('pClient').textContent=$('client').value||'—';$('pPlace').textContent=$('place').value||'—';
+ $('pAddress').textContent=$('clientAddress').value||'—';$('pPhone').textContent=$('clientPhone').value||'—';$('pEmail').textContent=$('clientEmail').value||'—';
+ $('pSubtotal').textContent=money(sub);$('pDiscount').textContent=money(dv);$('pTotal').textContent=money(total);$('pAdvance').textContent=money(adv);$('pRemaining').textContent=money(total-adv);
+ $('printLines').innerHTML=lines.map(x=>`<tr><td class="p-qty" style="text-align:center">${esc(x.qty)}</td><td class="p-unit" style="text-align:center">${esc(x.unit)}</td><td>${esc(x.name)}</td><td class="p-price" style="text-align:right">${money(x.price)}</td><td class="p-value" style="text-align:right">${money(x.qty*x.price)}</td></tr>`).join('')||'<tr><td colspan="5">Nie dodano pozycji do wyceny.</td></tr>';
+ $('pNotes').textContent=$('notes').value.trim()?'Uwagi: '+$('notes').value.trim():'';
+ if(typeof calcCosts==='function')calcCosts();}
+function renderLines(){$('lines').innerHTML=lines.length?lines.map((x,i)=>`<tr><td><b>${esc(x.name)}</b><div class="muted">${esc(x.category.replaceAll('_',' '))}</div></td><td>${esc(x.unit)}</td><td><input aria-label="Ilość" type="number" min="0" step=".01" value="${x.qty}" data-i="${i}" data-k="qty"></td><td><input aria-label="Cena" type="number" min="0" step=".01" value="${x.price}" data-i="${i}" data-k="price"></td><td class="num"><b>${money(x.qty*x.price)}</b></td><td class="remove no-print"><button class="danger" data-del="${i}">Usuń</button></td></tr>`).join(''):'<tr><td colspan="6" class="muted">Nie dodano jeszcze żadnych usług.</td></tr>';document.querySelectorAll('[data-k]').forEach(el=>el.onchange=()=>{let i=+el.dataset.i,k=el.dataset.k;lines[i][k]=Math.max(0,Number(el.value)||0);renderLines();});document.querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{lines.splice(+el.dataset.del,1);renderLines();});totals();}
+let fixedCosts=[];
+try{fixedCosts=JSON.parse(localStorage.getItem('budwel_fixed_costs')||'[]');if(!Array.isArray(fixedCosts))fixedCosts=[];}catch(e){fixedCosts=[];}
+function saveFixedCosts(){localStorage.setItem('budwel_fixed_costs',JSON.stringify(fixedCosts));}
+function renderFixedCosts(){
+ const host=$('fixedCostRows');
+ host.innerHTML=fixedCosts.length?fixedCosts.map((x,i)=>`<div class="contractor-row"><div style="display:grid;grid-template-columns:minmax(130px,1fr) minmax(110px,160px);gap:8px;width:100%;align-items:center"><input aria-label="Nazwa kosztu stałego" placeholder="np. ZUS, księgowa" value="${esc(x.name||'')}" data-fixed-name="${i}"><input aria-label="Kwota miesięczna" type="number" min="0" step="0.01" placeholder="Kwota zł/miesiąc" value="${Number(x.amount)||0}" data-fixed-amount="${i}"></div><div class="contractor-actions"><button type="button" class="danger" data-fixed-del="${i}">Usuń</button></div></div>`).join(''):'<div class="muted">Nie dodano jeszcze kosztów stałych. Dodaj np. ZUS i księgową.</div>';
+ host.querySelectorAll('[data-fixed-name]').forEach(el=>el.oninput=()=>{fixedCosts[+el.dataset.fixedName].name=el.value;saveFixedCosts();});
+ host.querySelectorAll('[data-fixed-amount]').forEach(el=>el.oninput=()=>{fixedCosts[+el.dataset.fixedAmount].amount=Math.max(0,Number(el.value)||0);saveFixedCosts();calcCosts();});
+ host.querySelectorAll('[data-fixed-del]').forEach(el=>el.onclick=()=>{fixedCosts.splice(+el.dataset.fixedDel,1);saveFixedCosts();renderFixedCosts();calcCosts();});
+ const total=fixedCosts.reduce((sum,x)=>sum+Math.max(0,Number(x.amount)||0),0);$('monthlyFixed').value=total.toFixed(2);calcCosts();
+}
+$('addFixedCost').onclick=()=>{fixedCosts.push({name:'',amount:0});saveFixedCosts();renderFixedCosts();const fields=$('fixedCostRows').querySelectorAll('[data-fixed-name]');if(fields.length)fields[fields.length-1].focus();};
+function calcCosts(){
+ const days=Math.max(0,Number($('jobDays').value)||0),monthDays=Math.max(1,Number($('workDaysMonth').value)||20);
+ const fixed=Math.max(0,Number($('monthlyFixed').value)||0)*days/monthDays;
+ const distance=Math.max(0,Number($('jobDistance').value)||0),km=distance*2*days;
+ const consumption=Math.max(0,Number($('fuelConsumption').value)||0),fuelPrice=Math.max(0,Number($('fuelPrice').value)||0);
+ const fuel=km/100*consumption*fuelPrice,other=Math.max(0,Number($('otherCostAmount').value)||0),cost=fixed+fuel+other;
+ const revenue=Math.max(0,Number($('total').dataset.value||0));
+ $('fixedAllocated').value=money(fixed);$('totalKm').value=km.toLocaleString('pl-PL',{maximumFractionDigits:1})+' km';$('fuelCost').value=money(fuel);
+ $('costFixedOut').textContent=money(fixed);$('costFuelOut').textContent=money(fuel);$('costOtherOut').textContent=money(other);$('costTotalOut').textContent=money(cost);$('profitOut').textContent=money(revenue-cost);
+}
+['jobDays','workDaysMonth','fuelConsumption','fuelPrice','jobDistance','otherCostAmount'].forEach(id=>$(id).addEventListener('input',calcCosts));
+function getState(){return {fixedCosts:JSON.parse(JSON.stringify(fixedCosts)),contractorId:$('contractorSelect').value,client:$('client').value,place:$('place').value,clientPhone:$('clientPhone').value,clientEmail:$('clientEmail').value,clientAddress:$('clientAddress').value,number:$('number').value,date:$('date').value,discount:$('discount').value,advance:$('advance').value,notes:$('notes').value,jobDays:$('jobDays').value,workDaysMonth:$('workDaysMonth').value,monthlyFixed:$('monthlyFixed').value,vehicleName:$('vehicleName').value,fuelConsumption:$('fuelConsumption').value,fuelPrice:$('fuelPrice').value,jobDistance:$('jobDistance').value,otherCostName:$('otherCostName').value,otherCostAmount:$('otherCostAmount').value,lines};}
+function setState(s){if(Array.isArray(s.fixedCosts)){fixedCosts=s.fixedCosts;saveFixedCosts();renderFixedCosts();}['client','place','clientPhone','clientEmail','clientAddress','number','date','discount','advance','notes'].forEach(k=>$(k).value=s[k]??'');$('contractorSelect').value=s.contractorId||'';['jobDays','workDaysMonth','monthlyFixed','vehicleName','fuelConsumption','fuelPrice','jobDistance','otherCostName','otherCostAmount'].forEach(k=>$(k).value=s[k]??({jobDays:1,workDaysMonth:20,fuelConsumption:8,fuelPrice:6.5,otherCostAmount:0}[k]??''));lines=Array.isArray(s.lines)?s.lines:[];renderLines();calcCosts();}
+$('category').onchange=renderResults;$('search').oninput=renderResults;$('add').onclick=addLine;$('discount').oninput=totals;$('advance').oninput=totals;$('clear').onclick=()=>{if(confirm('Usunąć wszystkie pozycje?')){lines=[];renderLines();}};
+$('save').onclick=()=>{let s=getState(),key=s.number||'Ostatnia wycena';let all=JSON.parse(localStorage.getItem('budwel_quotes')||'{}');all[key]=s;localStorage.setItem('budwel_quotes',JSON.stringify(all));$('status').textContent='Wycena zapisana na tym urządzeniu.';};
+$('load').onclick=()=>{let all=JSON.parse(localStorage.getItem('budwel_quotes')||'{}'),keys=Object.keys(all);if(!keys.length){alert('Brak zapisanych wycen.');return;}let key=prompt('Wpisz numer wyceny do wczytania:\n'+keys.join('\n'),keys[keys.length-1]);if(key&&all[key])setState(all[key]);};
+$('export').onclick=()=>{
+ try{
+  const storage={};
+  for(let i=0;i<localStorage.length;i++){
+   const key=localStorage.key(i);
+   if(key && key.startsWith('budwel_')) storage[key]=localStorage.getItem(key);
+  }
+  // Utrwal aktualne dane terminarza i pozostałe dane robocze w kopii.
+  storage.budwel_appointments=JSON.stringify(appointments);
+  storage.budwel_contractors=JSON.stringify(contractors);
+  storage.budwel_fixed_costs=JSON.stringify(fixedCosts);
+  storage.budwel_quotes=localStorage.getItem('budwel_quotes')||'{}';
+  const backup={format:'BUDWEL-BACKUP-2',app:'BUD-WEL',createdAt:new Date().toISOString(),storage,current:getState(),appointments};
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json;charset=utf-8'});
+  download(blob,'BUD-WEL-kopia-zapasowa-'+new Date().toISOString().slice(0,10)+'.json');
+  $('status').textContent='Kopia zapasowa została przygotowana (w tym terminarz). Sprawdź folder Pobrane lub aplikację Pliki.';
+ }catch(err){alert('Nie udało się utworzyć kopii: '+err.message);}
+};
+function download(blob,name){
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=name;a.style.display='none';document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+$('importBtn').onclick=()=>$('importFile').click();
+$('importFile').onchange=async e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ try{
+  const obj=JSON.parse(await file.text());
+  if(obj.format==='BUDWEL-BACKUP-2' && obj.storage && typeof obj.storage==='object'){
+   if(!confirm('Przywrócić kopię z '+(obj.createdAt||'nieznanej daty')+'? Aktualne wyceny, terminarz, kontrahenci, koszty, cennik i ustawienia zostaną zastąpione danymi z kopii.'))return;
+   Object.keys(localStorage).filter(k=>k.startsWith('budwel_')).forEach(k=>localStorage.removeItem(k));
+   Object.entries(obj.storage).forEach(([k,v])=>{if(k.startsWith('budwel_')&&typeof v==='string')localStorage.setItem(k,v);});
+   if(Array.isArray(obj.appointments))localStorage.setItem('budwel_appointments',JSON.stringify(obj.appointments));
+   if(obj.current)localStorage.setItem('budwel_current',JSON.stringify(obj.current));
+   alert('Kopia została przywrócona, razem z terminarzem. Aplikacja zostanie odświeżona.');location.reload();
+  }else if(obj.format==='BUDWEL-WYCENA-1'){
+   if(!confirm('Przywrócić starszą kopię BUD-WEL? Dane wycen, terminarza, kontrahentów i kosztów zostaną zastąpione.'))return;
+   localStorage.setItem('budwel_quotes',JSON.stringify(obj.quotes||{}));
+   if(Array.isArray(obj.contractors))localStorage.setItem('budwel_contractors',JSON.stringify(obj.contractors));
+   if(Array.isArray(obj.fixedCosts))localStorage.setItem('budwel_fixed_costs',JSON.stringify(obj.fixedCosts));
+   if(Array.isArray(obj.appointments))localStorage.setItem('budwel_appointments',JSON.stringify(obj.appointments));
+   if(obj.current)localStorage.setItem('budwel_current',JSON.stringify(obj.current));
+   alert('Starsza kopia została przywrócona. Aplikacja zostanie odświeżona.');location.reload();
+  }else throw Error('To nie jest rozpoznawalna kopia aplikacji BUD-WEL.');
+ }catch(err){alert('Nie udało się przywrócić kopii: '+err.message);}
+ finally{e.target.value='';}
+};
+$('pdf').onclick=()=>{totals();window.print();};init();renderFixedCosts();calcCosts();
+renderCalendar();renderAppointmentList();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script></body></html>
